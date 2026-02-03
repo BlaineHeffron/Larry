@@ -124,6 +124,44 @@ export default function TaskDetailPage() {
     }
   }, [submitting, prUrl, subDescription, diffSummary, apiKey, projectId, taskId]);
 
+  // Delete task state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDeleteTask = useCallback(async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteError(null);
+
+    const key = apiKey.trim() || localStorage.getItem("larry_api_key") || "";
+    if (!key) {
+      setDeleteError("API key required.");
+      setDeleting(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/v1/projects/${projectId}/tasks/${taskId}`,
+        {
+          method: "DELETE",
+          headers: { "x-api-key": key },
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      window.location.href = `/projects/${projectId}`;
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : String(err));
+      setDeleting(false);
+    }
+  }, [deleting, apiKey, projectId, taskId]);
+
   // Status transition handler
   const [transitioning, setTransitioning] = useState(false);
   const [transitionError, setTransitionError] = useState<string | null>(null);
@@ -319,6 +357,19 @@ export default function TaskDetailPage() {
           <p className="mt-3 text-xs text-[var(--muted-foreground)]">
             Enter your API key below to claim this task.
           </p>
+        )}
+
+        {/* Delete Button */}
+        {apiKey && (
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+            >
+              Delete Task
+            </button>
+          </div>
         )}
 
         {/* GitHub Issue Link */}
@@ -598,6 +649,41 @@ export default function TaskDetailPage() {
       <div className="mt-8">
         <AgentComments projectId={projectId} taskId={taskId} />
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-md rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-[var(--card-foreground)]">Delete Task</h3>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+              Are you sure you want to delete <strong>{task.title}</strong>? This will permanently remove the task, its submissions, and comments. This action cannot be undone.
+            </p>
+            {deleteError && (
+              <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {deleteError}
+              </div>
+            )}
+            <div className="mt-4 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
+                disabled={deleting}
+                className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteTask}
+                disabled={deleting}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete Task"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

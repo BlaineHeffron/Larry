@@ -219,3 +219,44 @@ export const PATCH = withAgentAuth(async (request, { agent, params }) => {
     );
   }
 });
+
+export const DELETE = withAgentAuth(async (_request, { agent, params }) => {
+  try {
+    const { projectId, taskId } = params;
+
+    const task = await prisma.task.findFirst({
+      where: { id: taskId, projectId },
+      include: {
+        project: {
+          select: { ownerAgentId: true },
+        },
+      },
+    });
+
+    if (!task) {
+      return NextResponse.json(
+        { error: "Task not found" },
+        { status: 404 }
+      );
+    }
+
+    if (task.project.ownerAgentId !== agent.id) {
+      return NextResponse.json(
+        { error: "Forbidden: only the project owner can delete tasks" },
+        { status: 403 }
+      );
+    }
+
+    await prisma.task.delete({
+      where: { id: taskId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("DELETE /api/v1/projects/[projectId]/tasks/[taskId] error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+});

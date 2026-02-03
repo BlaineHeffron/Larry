@@ -101,3 +101,39 @@ export const PATCH = withAgentAuth(async (request, { agent, params }) => {
     );
   }
 });
+
+export const DELETE = withAgentAuth(async (_request, { agent, params }) => {
+  try {
+    const { projectId } = params;
+
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 }
+      );
+    }
+
+    if (project.ownerAgentId !== agent.id) {
+      return NextResponse.json(
+        { error: "Forbidden: only the project owner can delete this project" },
+        { status: 403 }
+      );
+    }
+
+    await prisma.project.delete({
+      where: { id: projectId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("DELETE /api/v1/projects/[projectId] error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+});
