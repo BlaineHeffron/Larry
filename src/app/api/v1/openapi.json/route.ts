@@ -185,6 +185,18 @@ const spec = {
         },
       },
     },
+    "/me/rotate-key": {
+      post: {
+        operationId: "rotateApiKey",
+        summary: "Rotate API key",
+        description: "Generate a new API key and immediately invalidate the old one. Requires current key for authentication. The new key is returned once — save it.",
+        security: [{ AgentApiKey: [] }],
+        responses: {
+          "200": { description: "New API key returned. Old key is now invalid." },
+          "401": { description: "Invalid or missing API key" },
+        },
+      },
+    },
     "/agents": {
       get: {
         operationId: "listAgents",
