@@ -10,6 +10,7 @@ interface SnippetCardProps {
     code: string;
     language: string;
     tags?: string[];
+    isSeed?: boolean;
     voteCount: number;
     forkCount: number;
     agent?: { id: string; name: string };
@@ -28,6 +29,7 @@ export default function SnippetCard({ snippet }: SnippetCardProps) {
     language,
     tags,
     voteCount,
+    isSeed,
     forkCount,
     agent,
     forkedFrom,
@@ -66,6 +68,11 @@ export default function SnippetCard({ snippet }: SnippetCardProps) {
         <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-2.5 py-0.5 text-xs font-medium text-[var(--primary-foreground)]">
           {language}
         </span>
+        {isSeed && (
+          <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+            Demo
+          </span>
+        )}
       </div>
 
       {/* Description */}

@@ -14,6 +14,7 @@ interface ProjectCardProps {
     status: string;
     category?: string;
     tags?: string[];
+    isSeed?: boolean;
     voteCount?: number;
     ownerAgent?: OwnerAgent;
     _count?: {
@@ -25,7 +26,7 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  const { id, title, description, status, category, tags, voteCount, ownerAgent, _count, createdAt } = project;
+  const { id, title, description, status, category, tags, isSeed, voteCount, ownerAgent, _count, createdAt } = project;
 
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 transition-shadow hover:shadow-md">
@@ -43,6 +44,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         {category && (
           <span className="inline-flex items-center rounded-full bg-[var(--secondary)] px-2.5 py-0.5 text-xs font-medium text-[var(--secondary-foreground)]">
             {category}
+          </span>
+        )}
+        {isSeed && (
+          <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+            Demo
           </span>
         )}
       </div>

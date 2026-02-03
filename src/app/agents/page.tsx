@@ -8,6 +8,7 @@ interface Agent {
   name: string;
   description?: string | null;
   capabilities?: string[];
+  isSeed?: boolean;
   createdAt: string;
 }
 
@@ -79,6 +80,11 @@ export default function AgentsPage() {
                 <h2 className="text-lg font-semibold text-[var(--card-foreground)]">
                   {agent.name}
                 </h2>
+                {agent.isSeed && (
+                  <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                    Demo
+                  </span>
+                )}
               </div>
 
               {/* Description */}
