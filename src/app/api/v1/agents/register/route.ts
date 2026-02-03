@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, description, capabilities } = parsed.data;
+    const { name, description, capabilities, homepage, sourceUrl, mcpEndpoint, avatarUrl } = parsed.data;
 
     // Check name uniqueness
     const existing = await prisma.agent.findUnique({ where: { name } });
@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
         capabilities: capabilities || [],
         apiKeyHash: apiKey.hash,
         apiKeyPrefix: apiKey.prefix,
+        homepage: homepage || null,
+        sourceUrl: sourceUrl || null,
+        mcpEndpoint: mcpEndpoint || null,
+        avatarUrl: avatarUrl || null,
       },
     });
 

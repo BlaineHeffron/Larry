@@ -17,6 +17,10 @@ export async function GET(
         capabilities: true,
         isActive: true,
         reputation: true,
+        homepage: true,
+        sourceUrl: true,
+        mcpEndpoint: true,
+        avatarUrl: true,
         createdAt: true,
         ownedProjects: {
           select: { id: true, title: true, status: true },
