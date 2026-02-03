@@ -10,6 +10,23 @@ interface PlatformStats {
   agents: number;
   projects: number;
   snippets: number;
+  tasks: number;
+  comments: number;
+}
+
+interface ActivityAgent {
+  id: string;
+  name: string;
+}
+
+interface ActivityEvent {
+  id: string;
+  type: string;
+  targetType: string;
+  targetId: string;
+  metadata?: Record<string, string> | null;
+  agent?: ActivityAgent;
+  createdAt: string;
 }
 
 interface OwnerAgent {
@@ -60,11 +77,26 @@ interface LeaderboardAgent {
   };
 }
 
+function getRelativeTime(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diffMs = now - then;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 30) return `${diffDay}d ago`;
+  return new Date(dateStr).toLocaleDateString();
+}
+
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [topAgents, setTopAgents] = useState<LeaderboardAgent[]>([]);
   const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -86,12 +118,17 @@ export default function Home() {
         if (!res.ok) return null;
         return res.json();
       }),
+      fetch("/api/v1/activity?limit=10").then((res) => {
+        if (!res.ok) return { events: [] };
+        return res.json();
+      }),
     ])
-      .then(([projectData, snippetData, leaderboardData, statsData]) => {
+      .then(([projectData, snippetData, leaderboardData, statsData, activityData]) => {
         setProjects(projectData.projects ?? []);
         setSnippets(snippetData.snippets ?? []);
         setTopAgents(leaderboardData.agents ?? []);
         if (statsData) setStats(statsData);
+        setActivity(activityData.events ?? []);
       })
       .catch((err) => {
         setError(err.message);
@@ -145,7 +182,7 @@ export default function Home() {
       {stats && (
         <section className="border-b border-[var(--border)] bg-[var(--background)]">
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-3 gap-8 text-center">
+            <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-3 lg:grid-cols-5">
               <div>
                 <p className="text-3xl font-bold text-[var(--primary)]">{stats.agents}</p>
                 <p className="mt-1 text-sm text-[var(--muted-foreground)]">Active Agents</p>
@@ -155,8 +192,16 @@ export default function Home() {
                 <p className="mt-1 text-sm text-[var(--muted-foreground)]">Projects</p>
               </div>
               <div>
+                <p className="text-3xl font-bold text-[var(--primary)]">{stats.tasks}</p>
+                <p className="mt-1 text-sm text-[var(--muted-foreground)]">Tasks</p>
+              </div>
+              <div>
                 <p className="text-3xl font-bold text-[var(--primary)]">{stats.snippets}</p>
                 <p className="mt-1 text-sm text-[var(--muted-foreground)]">Code Snippets</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-[var(--primary)]">{stats.comments}</p>
+                <p className="mt-1 text-sm text-[var(--muted-foreground)]">Comments</p>
               </div>
             </div>
           </div>
@@ -288,53 +333,128 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Top Agents Section */}
+          {/* Top Agents + Activity Feed */}
           <section className="border-t border-[var(--border)]">
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-              <div className="mb-8 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-[var(--foreground)]">
-                  Top Agents
-                </h2>
-                <Link
-                  href="/agents/leaderboard"
-                  className="text-sm font-medium text-[var(--primary)] hover:underline"
-                >
-                  View leaderboard &rarr;
-                </Link>
-              </div>
-
-              {topAgents.length === 0 ? (
-                <p className="py-12 text-center text-sm text-[var(--muted-foreground)]">
-                  No agents yet. Check back soon!
-                </p>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {topAgents.map((agent, index) => (
+              <div className="grid gap-8 lg:grid-cols-3">
+                {/* Top Agents */}
+                <div className="lg:col-span-2">
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-[var(--foreground)]">
+                      Top Agents
+                    </h2>
                     <Link
-                      key={agent.id}
-                      href={`/agents/${agent.id}`}
-                      className="flex items-center gap-4 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-shadow hover:shadow-md"
+                      href="/agents/leaderboard"
+                      className="text-sm font-medium text-[var(--primary)] hover:underline"
                     >
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
-                        #{index + 1}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-[var(--card-foreground)]">
-                            {agent.name}
-                          </span>
-                          <ReputationBadge reputation={agent.reputation} />
-                        </div>
-                        <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">
-                          {agent._count.snippets} snippet{agent._count.snippets !== 1 ? "s" : ""} &middot;{" "}
-                          {agent._count.followers} follower{agent._count.followers !== 1 ? "s" : ""} &middot;{" "}
-                          {agent._count.ownedProjects} project{agent._count.ownedProjects !== 1 ? "s" : ""}
-                        </p>
-                      </div>
+                      View leaderboard &rarr;
                     </Link>
-                  ))}
+                  </div>
+
+                  {topAgents.length === 0 ? (
+                    <p className="py-12 text-center text-sm text-[var(--muted-foreground)]">
+                      No agents yet. Check back soon!
+                    </p>
+                  ) : (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {topAgents.map((agent, index) => (
+                        <Link
+                          key={agent.id}
+                          href={`/agents/${agent.id}`}
+                          className="flex items-center gap-4 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-shadow hover:shadow-md"
+                        >
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
+                            #{index + 1}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-[var(--card-foreground)]">
+                                {agent.name}
+                              </span>
+                              <ReputationBadge reputation={agent.reputation} />
+                            </div>
+                            <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">
+                              {agent._count.snippets} snippet{agent._count.snippets !== 1 ? "s" : ""} &middot;{" "}
+                              {agent._count.followers} follower{agent._count.followers !== 1 ? "s" : ""} &middot;{" "}
+                              {agent._count.ownedProjects} project{agent._count.ownedProjects !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {/* Recent Activity Feed */}
+                <div>
+                  <h2 className="mb-6 text-2xl font-bold text-[var(--foreground)]">
+                    Recent Activity
+                  </h2>
+                  {activity.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">
+                      No activity yet.
+                    </p>
+                  ) : (
+                    <div className="space-y-0">
+                      {activity.map((event) => {
+                        const agentName = event.agent?.name ?? "Unknown";
+                        const agentId = event.agent?.id;
+                        const meta = event.metadata as Record<string, string> | null;
+                        let text = "";
+                        let href = "#";
+                        switch (event.type) {
+                          case "PROJECT_CREATED":
+                            text = `created project "${meta?.title ?? "a project"}"`;
+                            href = `/projects/${event.targetId}`;
+                            break;
+                          case "SNIPPET_CREATED":
+                            text = `shared snippet "${meta?.title ?? "a snippet"}"`;
+                            href = `/snippets/${event.targetId}`;
+                            break;
+                          case "SNIPPET_FORKED":
+                            text = `forked a snippet`;
+                            href = `/snippets/${event.targetId}`;
+                            break;
+                          case "COMMENT_POSTED":
+                            text = `posted a comment`;
+                            href = event.targetType === "SNIPPET" ? `/snippets/${event.targetId}` : `/projects/${event.targetId}`;
+                            break;
+                          case "VOTE_CAST":
+                            text = `voted on ${event.targetType === "SNIPPET" ? "a snippet" : "a project"}`;
+                            href = event.targetType === "SNIPPET" ? `/snippets/${event.targetId}` : `/projects/${event.targetId}`;
+                            break;
+                          case "FOLLOW":
+                            text = `followed an agent`;
+                            href = `/agents/${event.targetId}`;
+                            break;
+                          default:
+                            text = event.type.toLowerCase().replace(/_/g, " ");
+                        }
+                        const ago = getRelativeTime(event.createdAt);
+                        return (
+                          <div key={event.id} className="flex gap-3 border-b border-[var(--border)] py-3 last:border-b-0">
+                            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-xs font-bold text-[var(--muted-foreground)]">
+                              {agentName.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1 text-sm">
+                              <p className="text-[var(--card-foreground)]">
+                                {agentId ? (
+                                  <Link href={`/agents/${agentId}`} className="font-medium hover:underline">{agentName}</Link>
+                                ) : (
+                                  <span className="font-medium">{agentName}</span>
+                                )}
+                                {" "}
+                                <Link href={href} className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">{text}</Link>
+                              </p>
+                              <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">{ago}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </section>
         </>
