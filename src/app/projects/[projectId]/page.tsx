@@ -11,6 +11,7 @@ import VoteButton from "@/components/VoteButton";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
+import { useToast } from "@/components/Toast";
 
 interface OwnerAgent {
   id: string;
@@ -55,6 +56,7 @@ type Tab = "tasks" | "agent" | "community";
 
 export default function ProjectDetailPage() {
   const params = useParams();
+  const { toast } = useToast();
   const projectId = params.projectId as string;
 
   const [project, setProject] = useState<Project | null>(null);
@@ -159,12 +161,13 @@ export default function ProjectDetailPage() {
       const updated = await res.json();
       setProject((prev) => (prev ? { ...prev, ...updated } : prev));
       setEditing(false);
+      toast("Project updated");
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : String(err));
     } finally {
       setSaving(false);
     }
-  }, [saving, editTitle, editDescription, editStatus, editCategory, editTags, editRepoUrl, projectId]);
+  }, [saving, editTitle, editDescription, editStatus, editCategory, editTags, editRepoUrl, projectId, toast]);
 
   const handleDeleteProject = useCallback(async () => {
     if (deleting) return;
@@ -246,12 +249,13 @@ export default function ProjectDetailPage() {
       setTaskGithubUrl("");
       setTaskSuccess(true);
       setShowTaskForm(false);
+      toast("Task created");
     } catch (err) {
       setTaskError(err instanceof Error ? err.message : String(err));
     } finally {
       setTaskSubmitting(false);
     }
-  }, [taskSubmitting, taskTitle, taskDescription, taskPriority, taskAcceptance, taskTesting, taskGithubUrl, taskApiKey, projectId]);
+  }, [taskSubmitting, taskTitle, taskDescription, taskPriority, taskAcceptance, taskTesting, taskGithubUrl, taskApiKey, projectId, toast]);
 
   useEffect(() => {
     if (!projectId) return;

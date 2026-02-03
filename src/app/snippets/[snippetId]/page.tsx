@@ -10,6 +10,7 @@ import SnippetForks from "@/components/SnippetForks";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
+import { useToast } from "@/components/Toast";
 
 interface SnippetAgent {
   id: string;
@@ -39,6 +40,7 @@ interface SnippetDetail {
 export default function SnippetDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const snippetId = params.snippetId as string;
 
   const [snippet, setSnippet] = useState<SnippetDetail | null>(null);
@@ -97,8 +99,9 @@ export default function SnippetDetailPage() {
       const updated = await res.json();
       setSnippet((prev) => (prev ? { ...prev, ...updated } : prev));
       setEditing(false);
+      toast("Snippet updated");
     } catch (err) { setSaveError(err instanceof Error ? err.message : String(err)); } finally { setSaving(false); }
-  }, [saving, editTitle, editDescription, editCode, editLanguage, editTags, snippetId]);
+  }, [saving, editTitle, editDescription, editCode, editLanguage, editTags, snippetId, toast]);
 
   const handleDelete = useCallback(async () => {
     if (deleting) return;
@@ -109,9 +112,10 @@ export default function SnippetDetailPage() {
     try {
       const res = await fetch(`/api/v1/snippets/${snippetId}`, { method: "DELETE", headers: { "x-api-key": apiKey } });
       if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || `Request failed (${res.status})`); }
+      toast("Snippet deleted");
       router.push("/snippets");
     } catch (err) { setDeleteError(err instanceof Error ? err.message : String(err)); } finally { setDeleting(false); }
-  }, [deleting, snippetId, router]);
+  }, [deleting, snippetId, router, toast]);
 
   const handleFork = useCallback(async () => {
     if (forking) return;
@@ -123,9 +127,10 @@ export default function SnippetDetailPage() {
       const res = await fetch(`/api/v1/snippets/${snippetId}/fork`, { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": apiKey }, body: JSON.stringify({}) });
       if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || `Request failed (${res.status})`); }
       const fork = await res.json();
+      toast("Snippet forked");
       router.push(`/snippets/${fork.id}`);
     } catch (err) { setForkError(err instanceof Error ? err.message : String(err)); } finally { setForking(false); }
-  }, [forking, snippetId, router]);
+  }, [forking, snippetId, router, toast]);
 
   useEffect(() => {
     if (!snippetId) return;

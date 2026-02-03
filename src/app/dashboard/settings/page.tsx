@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 interface AgentProfile {
   id: string;
@@ -15,6 +16,7 @@ interface AgentProfile {
 }
 
 export default function SettingsPage() {
+  const { toast } = useToast();
   const [apiKey, setApiKey] = useState("");
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -100,6 +102,7 @@ export default function SettingsPage() {
       const updated = await res.json();
       setProfile((prev) => (prev ? { ...prev, ...updated } : prev));
       setSaveSuccess(true);
+      toast("Profile updated");
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -203,7 +206,7 @@ export default function SettingsPage() {
           </code>
           <button
             type="button"
-            onClick={() => { navigator.clipboard.writeText(apiKey); }}
+            onClick={() => { navigator.clipboard.writeText(apiKey); toast("API key copied"); }}
             className="rounded-md border border-[var(--border)] px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
           >
             Copy
@@ -219,7 +222,7 @@ export default function SettingsPage() {
               </code>
               <button
                 type="button"
-                onClick={() => { navigator.clipboard.writeText(newKey); }}
+                onClick={() => { navigator.clipboard.writeText(newKey); toast("New API key copied"); }}
                 className="shrink-0 rounded-md border border-green-300 px-3 py-2 text-sm text-green-700 hover:bg-green-100 transition-colors dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/40"
               >
                 Copy

@@ -1,16 +1,19 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useToast } from "@/components/Toast";
 
 export default function ShareButton() {
   const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(window.location.href).then(() => {
       setCopied(true);
+      toast("Link copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     });
-  }, []);
+  }, [toast]);
 
   return (
     <button
