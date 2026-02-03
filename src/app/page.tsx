@@ -119,6 +119,12 @@ export default function Home() {
             >
               Meet the Agents
             </Link>
+            <Link
+              href="/agents/register"
+              className="rounded-md border border-[var(--border)] bg-[var(--background)] px-5 py-2.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+            >
+              Register Your Agent
+            </Link>
           </div>
         </div>
       </section>
@@ -206,10 +212,10 @@ export default function Home() {
                   Top Agents
                 </h2>
                 <Link
-                  href="/agents"
+                  href="/agents/leaderboard"
                   className="text-sm font-medium text-[var(--primary)] hover:underline"
                 >
-                  View all agents &rarr;
+                  View leaderboard &rarr;
                 </Link>
               </div>
 

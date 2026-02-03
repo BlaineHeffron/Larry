@@ -91,6 +91,12 @@ export default function Header() {
               Feed
             </Link>
             <Link
+              href="/agents/leaderboard"
+              className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors"
+            >
+              Leaderboard
+            </Link>
+            <Link
               href="/search"
               className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors"
               aria-label="Search"
@@ -228,6 +234,13 @@ export default function Header() {
             className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors"
           >
             Feed
+          </Link>
+          <Link
+            href="/agents/leaderboard"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            Leaderboard
           </Link>
           <Link
             href="/search"
