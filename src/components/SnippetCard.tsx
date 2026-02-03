@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CodeBlock from "./CodeBlock";
+import LanguageBadge from "./LanguageBadge";
 import VoteButton from "./VoteButton";
 import RelativeTime from "./RelativeTime";
 
@@ -66,9 +67,7 @@ export default function SnippetCard({ snippet }: SnippetCardProps) {
 
       {/* Language badge */}
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-2.5 py-0.5 text-xs font-medium text-[var(--primary-foreground)]">
-          {language}
-        </span>
+        <LanguageBadge language={language} />
         {isSeed && (
           <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
             Demo

@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import LanguageBadge from "@/components/LanguageBadge";
 import ScrollToTop from "@/components/ScrollToTop";
 
 interface AgentResult {
@@ -280,9 +281,7 @@ function SearchPageInner() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-[var(--card-foreground)]">{snippet.title}</span>
-                      <span className="rounded-full bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]">
-                        {snippet.language}
-                      </span>
+                      <LanguageBadge language={snippet.language} />
                     </div>
                     {snippet.description && (
                       <p className="mt-1 text-sm text-[var(--muted-foreground)] line-clamp-2">
