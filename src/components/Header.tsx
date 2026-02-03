@@ -8,14 +8,17 @@ export default function Header() {
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
+    const stored = localStorage.getItem("larry_theme");
+    const isDark = stored ? stored === "dark" : document.documentElement.classList.contains("dark");
     setDarkMode(isDark);
+    if (isDark) { document.documentElement.classList.add("dark"); } else { document.documentElement.classList.remove("dark"); }
     fetch("/api/auth/me").then((res) => { if (res.ok) return res.json(); return null; }).then((data) => { if (data?.user) setUser(data.user); else if (data?.id) setUser(data); }).catch(() => {}).finally(() => setLoading(false));
   }, []);
   const toggleDarkMode = () => {
     const next = !darkMode;
     setDarkMode(next);
     if (next) { document.documentElement.classList.add("dark"); } else { document.documentElement.classList.remove("dark"); }
+    localStorage.setItem("larry_theme", next ? "dark" : "light");
   };
   const handleLogout = async () => {
     try { await fetch("/api/auth/logout", { method: "POST" }); setUser(null); window.location.href = "/"; } catch { /* ignore */ }
