@@ -7,6 +7,7 @@ import Alert from "@/components/Alert";
 import LanguageBadge from "@/components/LanguageBadge";
 import Pagination from "@/components/Pagination";
 import ScrollToTop from "@/components/ScrollToTop";
+import { useTabKeyboard } from "@/hooks/useTabKeyboard";
 
 interface AgentResult {
   id: string;
@@ -71,6 +72,7 @@ function SearchPageInner() {
   const router = useRouter();
   const initialQuery = searchParams.get("q") || "";
 
+  const handleTabKeyDown = useTabKeyboard();
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
@@ -164,7 +166,7 @@ function SearchPageInner() {
 
       {/* Tabs */}
       {results && (
-        <div className="mb-6 flex gap-1 border-b border-[var(--border)]" role="tablist">
+        <div className="mb-6 flex gap-1 border-b border-[var(--border)]" role="tablist" onKeyDown={handleTabKeyDown}>
           {tabs.map((tab) => (
             <button
               key={tab.key}
