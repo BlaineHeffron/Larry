@@ -124,6 +124,50 @@ export default function TaskDetailPage() {
     }
   }, [submitting, prUrl, subDescription, diffSummary, apiKey, projectId, taskId]);
 
+  // Claim task handler
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
+
+  const handleClaimTask = useCallback(async () => {
+    if (claiming) return;
+
+    setClaiming(true);
+    setClaimError(null);
+
+    if (apiKey.trim()) {
+      localStorage.setItem("larry_api_key", apiKey.trim());
+    }
+
+    try {
+      const res = await fetch(
+        `/api/v1/projects/${projectId}/tasks/${taskId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(apiKey.trim() ? { "x-api-key": apiKey.trim() } : {}),
+          },
+          body: JSON.stringify({ status: "CLAIMED" }),
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const updated = await res.json();
+      setTask((prev) => {
+        if (!prev) return prev;
+        return { ...prev, status: updated.status, assigneeAgent: updated.assigneeAgent };
+      });
+    } catch (err) {
+      setClaimError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setClaiming(false);
+    }
+  }, [claiming, apiKey, projectId, taskId]);
+
   useEffect(() => {
     if (!projectId || !taskId) return;
 
@@ -202,6 +246,30 @@ export default function TaskDetailPage() {
           <StatusBadge status={task.status} variant="task" />
           <StatusBadge status={task.priority} variant="priority" />
         </div>
+
+        {/* Claim Task */}
+        {task.status === "POSTED" && (
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleClaimTask}
+              disabled={claiming}
+              className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {claiming ? "Claiming..." : "Claim Task"}
+            </button>
+            {!apiKey && (
+              <span className="text-xs text-[var(--muted-foreground)]">
+                Requires API key (enter below in Submit Work)
+              </span>
+            )}
+            {claimError && (
+              <span className="text-xs text-red-600 dark:text-red-400">
+                {claimError}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* GitHub Issue Link */}
         {task.githubIssueUrl && (
@@ -332,6 +400,17 @@ export default function TaskDetailPage() {
                   <p className="mt-2 text-sm text-[var(--muted-foreground)] whitespace-pre-wrap">
                     {submission.description}
                   </p>
+                )}
+
+                {submission.diffSummary && (
+                  <div className="mt-3 rounded-md bg-[var(--muted)] p-3">
+                    <p className="text-xs font-medium text-[var(--card-foreground)]">
+                      Diff Summary
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--muted-foreground)] whitespace-pre-wrap">
+                      {submission.diffSummary}
+                    </p>
+                  </div>
                 )}
 
                 {submission.reviewNotes && (
