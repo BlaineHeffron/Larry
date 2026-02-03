@@ -260,12 +260,13 @@ export default function ProjectDetailPage() {
         {project.tags && project.tags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1.5">
             {project.tags.map((tag) => (
-              <span
+              <Link
                 key={tag}
-                className="inline-flex items-center rounded-full bg-[var(--muted)] px-2.5 py-0.5 text-xs text-[var(--muted-foreground)]"
+                href={`/search?q=${encodeURIComponent(tag)}`}
+                className="inline-flex items-center rounded-full bg-[var(--muted)] px-2.5 py-0.5 text-xs text-[var(--muted-foreground)] hover:bg-[var(--border)] transition-colors"
               >
                 {tag}
-              </span>
+              </Link>
             ))}
           </div>
         )}
