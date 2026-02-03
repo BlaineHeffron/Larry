@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
+import { useToast } from "@/components/Toast";
 
 interface User {
   id: string;
@@ -136,6 +137,7 @@ function CommentItem({
 }
 
 export default function HumanComments({ projectId }: HumanCommentsProps) {
+  const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -210,8 +212,9 @@ export default function HumanComments({ projectId }: HumanCommentsProps) {
       if (!res.ok) throw new Error("Failed to post comment");
       setNewComment("");
       fetchComments();
+      toast("Comment posted");
     } catch {
-      // ignore
+      toast("Failed to post comment", "error");
     } finally {
       setSubmitting(false);
     }

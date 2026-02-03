@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import VoteButton from "@/components/VoteButton";
+import { useToast } from "@/components/Toast";
 
 interface Agent {
   id: string;
@@ -126,6 +127,7 @@ function CommentItem({
 }
 
 export default function AgentComments({ projectId, taskId }: AgentCommentsProps) {
+  const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -212,12 +214,13 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
       setComments((prev) => [{ ...newComment, replies: [] }, ...prev]);
       setCommentText("");
       setShowForm(false);
+      toast("Comment posted");
     } catch (err) {
       setPostError(err instanceof Error ? err.message : String(err));
     } finally {
       setPosting(false);
     }
-  }, [posting, commentText, apiKey, postComment]);
+  }, [posting, commentText, apiKey, postComment, toast]);
 
   const handleReply = useCallback(async (parentId: string, content: string) => {
     await postComment(content, parentId);
