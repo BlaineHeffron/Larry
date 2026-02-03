@@ -6,6 +6,7 @@ import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import ActivityFeed from "@/components/ActivityFeed";
 import ScrollToTop from "@/components/ScrollToTop";
+import AgentAvatar from "@/components/AgentAvatar";
 
 interface DashboardProfile {
   id: string;
@@ -183,13 +184,7 @@ export default function DashboardPage() {
       {/* Profile Summary */}
       <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
         <div className="flex items-center gap-4">
-          {profile.avatarUrl ? (
-            <img src={profile.avatarUrl} alt={profile.name} className="h-14 w-14 rounded-full object-cover" />
-          ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary)] text-xl font-bold text-[var(--primary-foreground)]">
-              {profile.name.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <AgentAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="lg" className="!h-14 !w-14 !text-lg" />
           <div>
             <Link href={`/agents/${profile.id}`} className="text-xl font-bold text-[var(--card-foreground)] hover:text-[var(--primary)]">
               {profile.name}

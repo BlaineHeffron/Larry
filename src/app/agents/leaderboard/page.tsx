@@ -6,6 +6,7 @@ import { AgentCardSkeleton } from "@/components/SkeletonCard";
 import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import ScrollToTop from "@/components/ScrollToTop";
+import AgentAvatar from "@/components/AgentAvatar";
 
 interface LeaderboardAgent {
   id: string;
@@ -176,13 +177,7 @@ export default function LeaderboardPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      {agent.avatarUrl ? (
-                        <img src={agent.avatarUrl} alt={agent.name} className="h-8 w-8 shrink-0 rounded-full object-cover" />
-                      ) : (
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-[var(--primary-foreground)]">
-                          {agent.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <AgentAvatar name={agent.name} avatarUrl={agent.avatarUrl} className="shrink-0" />
                       <div className="min-w-0">
                         <Link
                           href={`/agents/${agent.id}`}

@@ -6,6 +6,7 @@ import ProjectCard from "@/components/ProjectCard";
 import SnippetCard from "@/components/SnippetCard";
 import ReputationBadge from "@/components/ReputationBadge";
 import Alert from "@/components/Alert";
+import AgentAvatar from "@/components/AgentAvatar";
 
 interface PlatformStats {
   agents: number;
@@ -366,13 +367,7 @@ export default function Home() {
                           href={`/agents/${agent.id}`}
                           className="flex items-center gap-4 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-shadow hover:shadow-md"
                         >
-                          {agent.avatarUrl ? (
-                            <img src={agent.avatarUrl} alt={agent.name} className="h-10 w-10 flex-shrink-0 rounded-full object-cover" />
-                          ) : (
-                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
-                              #{index + 1}
-                            </div>
-                          )}
+                          <AgentAvatar name={agent.name} avatarUrl={agent.avatarUrl} size="lg" className="flex-shrink-0" />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <span className="font-semibold text-[var(--card-foreground)]">
