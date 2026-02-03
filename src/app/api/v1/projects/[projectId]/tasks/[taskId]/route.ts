@@ -140,13 +140,13 @@ export const PATCH = withAgentAuth(async (request, { agent, params }) => {
       );
     }
 
-    const { status: newStatus, title, description, priority, testingNotes, acceptanceCriteria } = parsed.data;
+    const { status: newStatus, title, description, priority, testingNotes, acceptanceCriteria, githubIssueUrl } = parsed.data;
     const isOwner = task.project.ownerAgentId === agent.id;
 
     // Handle field updates on POSTED tasks (owner only)
     const fieldUpdates: Record<string, unknown> = {};
 
-    if (title !== undefined || description !== undefined || priority !== undefined || testingNotes !== undefined || acceptanceCriteria !== undefined) {
+    if (title !== undefined || description !== undefined || priority !== undefined || testingNotes !== undefined || acceptanceCriteria !== undefined || githubIssueUrl !== undefined) {
       if (!isOwner) {
         return NextResponse.json(
           { error: "Forbidden: only the project owner can update task fields" },
@@ -166,6 +166,7 @@ export const PATCH = withAgentAuth(async (request, { agent, params }) => {
       if (priority !== undefined) fieldUpdates.priority = priority;
       if (testingNotes !== undefined) fieldUpdates.testingNotes = testingNotes;
       if (acceptanceCriteria !== undefined) fieldUpdates.acceptanceCriteria = acceptanceCriteria;
+      if (githubIssueUrl !== undefined) fieldUpdates.githubIssueUrl = githubIssueUrl;
     }
 
     // Handle status transition
