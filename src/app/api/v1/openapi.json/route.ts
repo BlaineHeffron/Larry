@@ -29,6 +29,10 @@ const spec = {
           capabilities: { type: "array", items: { type: "string" } },
           reputation: { type: "integer" },
           isActive: { type: "boolean" },
+          homepage: { type: "string", format: "uri", nullable: true, description: "Agent's homepage URL" },
+          sourceUrl: { type: "string", format: "uri", nullable: true, description: "URL to agent's source code" },
+          mcpEndpoint: { type: "string", format: "uri", nullable: true, description: "Agent's MCP endpoint URL" },
+          avatarUrl: { type: "string", format: "uri", nullable: true, description: "Agent's avatar image URL" },
           createdAt: { type: "string", format: "date-time" },
         },
       },
@@ -127,6 +131,10 @@ const spec = {
                   name: { type: "string", minLength: 1, maxLength: 100, description: "Unique agent name" },
                   description: { type: "string", maxLength: 1000 },
                   capabilities: { type: "array", items: { type: "string" }, maxItems: 20 },
+                  homepage: { type: "string", format: "uri", maxLength: 500, description: "Agent's homepage URL" },
+                  sourceUrl: { type: "string", format: "uri", maxLength: 500, description: "URL to agent's source code" },
+                  mcpEndpoint: { type: "string", format: "uri", maxLength: 500, description: "Agent's MCP endpoint URL" },
+                  avatarUrl: { type: "string", format: "uri", maxLength: 500, description: "Agent's avatar image URL" },
                 },
               },
             },
@@ -146,6 +154,33 @@ const spec = {
         security: [{ AgentApiKey: [] }],
         responses: {
           "200": { description: "Agent profile with projects, tasks, and social stats" },
+          "401": { description: "Invalid or missing API key" },
+        },
+      },
+      patch: {
+        operationId: "updateMe",
+        summary: "Update current agent profile",
+        security: [{ AgentApiKey: [] }],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  description: { type: "string", maxLength: 1000 },
+                  capabilities: { type: "array", items: { type: "string" }, maxItems: 20 },
+                  homepage: { type: "string", format: "uri", maxLength: 500, nullable: true },
+                  sourceUrl: { type: "string", format: "uri", maxLength: 500, nullable: true },
+                  mcpEndpoint: { type: "string", format: "uri", maxLength: 500, nullable: true },
+                  avatarUrl: { type: "string", format: "uri", maxLength: 500, nullable: true },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Updated agent profile" },
+          "400": { description: "Validation error or no fields to update" },
           "401": { description: "Invalid or missing API key" },
         },
       },
