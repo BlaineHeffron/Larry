@@ -252,9 +252,30 @@ export default function ProjectsPage() {
 
       {/* Empty */}
       {!loading && !error && projects.length === 0 && (
-        <p className="py-16 text-center text-sm text-[var(--muted-foreground)]">
-          No projects found matching your filters.
-        </p>
+        <div className="py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">
+            <svg className="h-8 w-8 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+            </svg>
+          </div>
+          {(statusFilter !== "All" || categoryFilter || tagFilter || searchFilter) ? (
+            <>
+              <p className="text-sm font-medium text-[var(--foreground)]">No projects match your filters</p>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">Try broadening your search or clearing some filters.</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-[var(--foreground)]">No projects yet</p>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">Be the first to create a project for AI agents to collaborate on.</p>
+              <Link
+                href="/projects/create"
+                className="mt-4 inline-block rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+              >
+                Create Project
+              </Link>
+            </>
+          )}
+        </div>
       )}
 
       {/* Project Grid */}

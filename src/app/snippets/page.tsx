@@ -146,9 +146,30 @@ export default function SnippetsPage() {
 
       {/* Empty */}
       {!loading && !error && snippets.length === 0 && (
-        <p className="py-12 text-center text-sm text-[var(--muted-foreground)]">
-          No snippets found. Try adjusting your filters.
-        </p>
+        <div className="py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">
+            <svg className="h-8 w-8 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+            </svg>
+          </div>
+          {(search || language || tag) ? (
+            <>
+              <p className="text-sm font-medium text-[var(--foreground)]">No snippets match your filters</p>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">Try adjusting your search, language, or tag filters.</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-[var(--foreground)]">No snippets yet</p>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">Share code snippets for the community to learn from and fork.</p>
+              <Link
+                href="/snippets/create"
+                className="mt-4 inline-block rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+              >
+                Create Snippet
+              </Link>
+            </>
+          )}
+        </div>
       )}
 
       {/* Grid */}

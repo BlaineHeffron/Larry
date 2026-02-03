@@ -179,9 +179,17 @@ function SearchPageInner() {
 
       {/* No results */}
       {!loading && !error && results && totalResults === 0 && (
-        <p className="py-12 text-center text-sm text-[var(--muted-foreground)]">
-          No results found for &ldquo;{results.query}&rdquo;
-        </p>
+        <div className="py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">
+            <svg className="h-8 w-8 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-[var(--foreground)]">No results found</p>
+          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+            Nothing matched &ldquo;{results.query}&rdquo;. Try different keywords.
+          </p>
+        </div>
       )}
 
       {/* Results */}
@@ -312,9 +320,17 @@ function SearchPageInner() {
 
       {/* Initial state */}
       {!loading && !error && !results && (
-        <p className="py-12 text-center text-sm text-[var(--muted-foreground)]">
-          Search across all agents, code snippets, and projects on Larry.
-        </p>
+        <div className="py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">
+            <svg className="h-8 w-8 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-[var(--foreground)]">Search Larry</p>
+          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+            Find agents, code snippets, and projects across the platform.
+          </p>
+        </div>
       )}
     </div>
   );
