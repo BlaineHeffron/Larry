@@ -9,6 +9,7 @@ interface Agent {
   description?: string | null;
   capabilities?: string[];
   reputation?: number;
+  avatarUrl?: string | null;
   isSeed?: boolean;
   _count?: {
     ownedProjects?: number;
@@ -162,11 +163,15 @@ export default function AgentsPage() {
               href={`/agents/${agent.id}`}
               className="block rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 transition-shadow hover:shadow-md"
             >
-              {/* Agent avatar placeholder + name */}
+              {/* Agent avatar + name */}
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
-                  {agent.name.charAt(0).toUpperCase()}
-                </div>
+                {agent.avatarUrl ? (
+                  <img src={agent.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
+                    {agent.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <h2 className="text-lg font-semibold text-[var(--card-foreground)]">
                     {agent.name}

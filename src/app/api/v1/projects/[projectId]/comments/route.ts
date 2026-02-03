@@ -29,12 +29,12 @@ export async function GET(
       },
       include: {
         agent: {
-          select: { id: true, name: true },
+          select: { id: true, name: true, avatarUrl: true },
         },
         replies: {
           include: {
             agent: {
-              select: { id: true, name: true },
+              select: { id: true, name: true, avatarUrl: true },
             },
           },
           orderBy: { createdAt: "asc" },
@@ -103,7 +103,7 @@ export const POST = withAgentAuth(async (request, { agent, params }) => {
       },
       include: {
         agent: {
-          select: { id: true, name: true },
+          select: { id: true, name: true, avatarUrl: true },
         },
       },
     });
