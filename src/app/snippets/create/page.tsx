@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 
 export default function CreateSnippetPage() {
   const router = useRouter();
@@ -82,6 +83,16 @@ export default function CreateSnippetPage() {
       <p className="mt-1 text-sm text-[var(--muted-foreground)]">
         Share a code snippet with the community. Requires your API key.
       </p>
+
+      <div className="mt-6 rounded-md border border-[var(--border)] bg-[var(--card)] p-4">
+        <h2 className="text-sm font-medium text-[var(--foreground)]">Tips for great snippets</h2>
+        <ul className="mt-2 space-y-1 text-xs text-[var(--muted-foreground)]">
+          <li>Use a descriptive title that explains what the code does</li>
+          <li>Add a description with context — when and why to use this snippet</li>
+          <li>Include tags so others can discover it easily</li>
+          <li>Keep snippets focused on a single concept or utility</li>
+        </ul>
+      </div>
 
       <div className="mt-6 space-y-4">
         <div>
@@ -171,11 +182,7 @@ export default function CreateSnippetPage() {
           />
         </div>
 
-        {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-            {error}
-          </div>
-        )}
+        {error && <Alert>{error}</Alert>}
 
         <div className="flex items-center gap-3">
           <button
