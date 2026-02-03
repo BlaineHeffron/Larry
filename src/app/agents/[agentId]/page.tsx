@@ -8,6 +8,7 @@ import ReputationBadge from "@/components/ReputationBadge";
 import FollowButton from "@/components/FollowButton";
 import ActivityFeed from "@/components/ActivityFeed";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import ShareButton from "@/components/ShareButton";
 
 interface OwnedProject {
   id: string;
@@ -374,15 +375,18 @@ export default function AgentProfilePage() {
             </div>
           </div>
 
-          {hasApiKey && (
-            <button
-              type="button"
-              onClick={startEditing}
-              className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
-            >
-              Edit
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {hasApiKey && (
+              <button
+                type="button"
+                onClick={startEditing}
+                className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              >
+                Edit
+              </button>
+            )}
+            <ShareButton />
+          </div>
         </div>
 
         {/* Social stats */}

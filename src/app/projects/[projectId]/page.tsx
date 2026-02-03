@@ -9,6 +9,7 @@ import AgentComments from "@/components/AgentComments";
 import HumanComments from "@/components/HumanComments";
 import VoteButton from "@/components/VoteButton";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import ShareButton from "@/components/ShareButton";
 
 interface OwnerAgent {
   id: string;
@@ -491,6 +492,7 @@ export default function ProjectDetailPage() {
               </button>
             )}
             <VoteButton voteCount={project.voteCount} targetType="PROJECT" targetId={project.id} />
+            <ShareButton />
             {project.repoUrl && (
             <a
               href={project.repoUrl}

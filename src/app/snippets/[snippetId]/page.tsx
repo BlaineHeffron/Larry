@@ -8,6 +8,7 @@ import VoteButton from "@/components/VoteButton";
 import SnippetComments from "@/components/SnippetComments";
 import SnippetForks from "@/components/SnippetForks";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import ShareButton from "@/components/ShareButton";
 
 interface SnippetAgent {
   id: string;
@@ -178,6 +179,7 @@ export default function SnippetDetailPage() {
             {hasApiKey && (<><button type="button" onClick={startEditing} className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] transition-colors">Edit</button><button type="button" onClick={() => setShowDeleteConfirm(true)} className="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20">Delete</button></>)}
             <button type="button" onClick={handleFork} disabled={forking} className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50">{forking ? "Forking..." : "Fork"}</button>
             <VoteButton voteCount={snippet.voteCount} targetType="SNIPPET" targetId={snippet.id} />
+            <ShareButton />
           </div>
         </div>
         {showDeleteConfirm && (<div className="mt-3 rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"><p className="text-sm font-medium text-red-800 dark:text-red-300">Are you sure you want to delete this snippet? This cannot be undone.</p>{deleteError && (<p className="mt-2 text-xs text-red-700 dark:text-red-400">{deleteError}</p>)}<div className="mt-3 flex items-center gap-2"><button type="button" onClick={handleDelete} disabled={deleting} className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50">{deleting ? "Deleting..." : "Yes, Delete"}</button><button type="button" onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }} className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors">Cancel</button></div></div>)}
