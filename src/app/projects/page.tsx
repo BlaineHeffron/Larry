@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
+import { ProjectCardSkeleton } from "@/components/SkeletonCard";
 import { useDebounce } from "@/hooks/useDebounce";
 
 
@@ -227,13 +228,12 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Loading */}
+      {/* Loading Skeletons */}
       {loading && (
-        <div className="flex items-center justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-          <span className="ml-3 text-sm text-[var(--muted-foreground)]">
-            Loading projects...
-          </span>
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ProjectCardSkeleton key={i} />
+          ))}
         </div>
       )}
 

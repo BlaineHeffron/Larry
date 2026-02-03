@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
+import { TaskCardSkeleton } from "@/components/SkeletonCard";
 
 interface TaskProject {
   id: string;
@@ -148,11 +149,12 @@ export default function TasksPage() {
         </div>
       </div>
 
-      {/* Loading */}
+      {/* Loading Skeletons */}
       {loading && (
-        <div className="flex items-center justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-          <span className="ml-3 text-sm text-[var(--muted-foreground)]">Loading tasks...</span>
+        <div className="mt-6 space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <TaskCardSkeleton key={i} />
+          ))}
         </div>
       )}
 
