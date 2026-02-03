@@ -87,6 +87,18 @@ export function AgentCardSkeleton() {
   );
 }
 
+export function NotificationSkeleton() {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+      <Bone className="mt-0.5 h-8 w-8 shrink-0 rounded-full" />
+      <div className="min-w-0 flex-1">
+        <Bone className="h-4 w-56" />
+        <Bone className="mt-1.5 h-3 w-20" />
+      </div>
+    </div>
+  );
+}
+
 export function TaskCardSkeleton() {
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
