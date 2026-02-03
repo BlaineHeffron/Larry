@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Alert from "@/components/Alert";
+import RelativeTime from "@/components/RelativeTime";
 
 interface NotificationEvent {
   id: string;
@@ -56,6 +58,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [fetchKey, setFetchKey] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem("larry_api_key");
@@ -64,6 +67,9 @@ export default function NotificationsPage() {
       return;
     }
     setHasApiKey(true);
+
+    setLoading(true);
+    setError(null);
 
     fetch("/api/v1/me/notifications", {
       headers: { "x-api-key": saved },
@@ -74,12 +80,11 @@ export default function NotificationsPage() {
       })
       .then((data) => {
         setNotifications(data.notifications);
-        // Mark as seen
         localStorage.setItem("larry_notifications_seen", new Date().toISOString());
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchKey]);
 
   if (!hasApiKey && !loading) {
     return (
@@ -115,9 +120,7 @@ export default function NotificationsPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
-          <h2 className="text-lg font-semibold text-red-800">{error}</h2>
-        </div>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>{error}</Alert>
       </div>
     );
   }
@@ -143,7 +146,6 @@ export default function NotificationsPage() {
           {notifications.map((event) => {
             const { text, href } = getNotificationText(event);
             const iconPath = getNotificationIcon(event.type);
-            const timeAgo = getRelativeTime(event.createdAt);
 
             return (
               <Link
@@ -158,7 +160,7 @@ export default function NotificationsPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-[var(--card-foreground)]">{text}</p>
-                  <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">{timeAgo}</p>
+                  <RelativeTime date={event.createdAt} className="mt-0.5 text-xs text-[var(--muted-foreground)]" />
                 </div>
               </Link>
             );
@@ -167,18 +169,4 @@ export default function NotificationsPage() {
       )}
     </div>
   );
-}
-
-function getRelativeTime(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = now - then;
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString();
 }

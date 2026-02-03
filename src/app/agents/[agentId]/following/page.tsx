@@ -117,6 +117,7 @@ export default function FollowingPage() {
       {totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">
           <button
+            aria-label="Previous page"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
             className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
@@ -125,6 +126,7 @@ export default function FollowingPage() {
           </button>
           <span className="text-sm text-[var(--muted-foreground)]">Page {page} of {totalPages} ({total} following)</span>
           <button
+            aria-label="Next page"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"

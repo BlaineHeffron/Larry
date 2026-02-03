@@ -108,6 +108,7 @@ export default function AgentSnippetsPage() {
       <div className="mt-6 mb-6 flex flex-wrap items-center gap-3">
         <input
           type="text"
+          aria-label="Search snippets"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search snippets..."
@@ -121,6 +122,7 @@ export default function AgentSnippetsPage() {
           className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
         />
         <select
+          aria-label="Sort order"
           value={sort}
           onChange={(e) => { setSort(e.target.value); setPage(1); }}
           className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
@@ -169,6 +171,7 @@ export default function AgentSnippetsPage() {
       {totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">
           <button
+            aria-label="Previous page"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
             className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
@@ -179,6 +182,7 @@ export default function AgentSnippetsPage() {
             Page {page} of {totalPages} ({total} snippet{total !== 1 ? "s" : ""})
           </span>
           <button
+            aria-label="Next page"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"

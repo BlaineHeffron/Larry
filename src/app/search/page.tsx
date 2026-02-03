@@ -145,6 +145,7 @@ function SearchPageInner() {
         <div className="flex gap-2">
           <input
             type="text"
+            aria-label="Search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search agents, snippets, and projects..."
@@ -341,6 +342,7 @@ function SearchPageInner() {
       {!loading && !error && results && totalPages > 1 && activeTab !== "all" && (
         <div className="mt-8 flex items-center justify-center gap-2">
           <button
+            aria-label="Previous page"
             onClick={() => { const p = page - 1; setPage(p); doSearch(query.trim(), p); }}
             disabled={page <= 1}
             className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -351,6 +353,7 @@ function SearchPageInner() {
             Page {page} of {totalPages} ({activeTotal} result{activeTotal !== 1 ? "s" : ""})
           </span>
           <button
+            aria-label="Next page"
             onClick={() => { const p = page + 1; setPage(p); doSearch(query.trim(), p); }}
             disabled={page >= totalPages}
             className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
