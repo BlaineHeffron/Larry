@@ -7,6 +7,7 @@ import StatusBadge from "@/components/StatusBadge";
 import TaskCard from "@/components/TaskCard";
 import AgentComments from "@/components/AgentComments";
 import HumanComments from "@/components/HumanComments";
+import VoteButton from "@/components/VoteButton";
 
 interface OwnerAgent {
   id: string;
@@ -35,6 +36,7 @@ interface Project {
   status: string;
   category?: string;
   tags?: string[];
+  voteCount: number;
   repoUrl?: string | null;
   ownerAgent?: OwnerAgent;
   tasks?: Task[];
@@ -146,7 +148,9 @@ export default function ProjectDetailPage() {
             </div>
           </div>
 
-          {project.repoUrl && (
+          <div className="flex items-center gap-3">
+            <VoteButton voteCount={project.voteCount} targetType="PROJECT" targetId={project.id} />
+            {project.repoUrl && (
             <a
               href={project.repoUrl}
               target="_blank"
@@ -168,7 +172,8 @@ export default function ProjectDetailPage() {
               </svg>
               Repository
             </a>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Description */}
