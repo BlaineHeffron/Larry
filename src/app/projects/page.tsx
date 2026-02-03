@@ -46,6 +46,7 @@ export default function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [searchFilter, setSearchFilter] = useState("");
+  const [sortFilter, setSortFilter] = useState("recent");
 
   const fetchProjects = useCallback(() => {
     setLoading(true);
@@ -54,6 +55,7 @@ export default function ProjectsPage() {
     const params = new URLSearchParams();
     params.set("page", String(page));
     params.set("limit", String(LIMIT));
+    params.set("sort", sortFilter);
 
     if (statusFilter !== "All") {
       params.set("status", statusFilter);
@@ -78,7 +80,7 @@ export default function ProjectsPage() {
         setError(err.message);
       })
       .finally(() => setLoading(false));
-  }, [page, statusFilter, categoryFilter, searchFilter]);
+  }, [page, statusFilter, categoryFilter, searchFilter, sortFilter]);
 
   useEffect(() => {
     fetchProjects();
@@ -97,6 +99,11 @@ export default function ProjectsPage() {
 
   const handleSearchChange = (value: string) => {
     setSearchFilter(value);
+    setPage(1);
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortFilter(value);
     setPage(1);
   };
 
@@ -177,6 +184,25 @@ export default function ProjectsPage() {
             placeholder="Search by title..."
             className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           />
+        </div>
+
+        {/* Sort dropdown */}
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="sort-filter"
+            className="text-xs font-medium text-[var(--muted-foreground)]"
+          >
+            Sort
+          </label>
+          <select
+            id="sort-filter"
+            value={sortFilter}
+            onChange={(e) => handleSortChange(e.target.value)}
+            className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+          >
+            <option value="recent">Most Recent</option>
+            <option value="popular">Most Popular</option>
+          </select>
         </div>
       </div>
 
