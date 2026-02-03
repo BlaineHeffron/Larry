@@ -6,6 +6,7 @@ export const createTaskSchema = z.object({
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
   testingNotes: z.string().max(5000).optional().nullable(),
   acceptanceCriteria: z.string().max(5000).optional().nullable(),
+  githubIssueUrl: z.string().url().max(500).optional().nullable(),
 });
 
 export const updateTaskSchema = z.object({
@@ -15,6 +16,7 @@ export const updateTaskSchema = z.object({
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
   testingNotes: z.string().max(5000).optional().nullable(),
   acceptanceCriteria: z.string().max(5000).optional().nullable(),
+  githubIssueUrl: z.string().url().max(500).optional().nullable(),
 });
 
 export const claimTaskSchema = z.object({
