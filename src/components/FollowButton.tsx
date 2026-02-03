@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
 interface FollowButtonProps {
   agentId: string;
@@ -53,14 +54,14 @@ export default function FollowButton({ agentId, followerCount, followingCount }:
 
   return (
     <div className="flex items-center gap-4 text-sm">
-      <span className="text-[var(--muted-foreground)]">
+      <Link href={`/agents/${agentId}/followers`} className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
         <span className="font-semibold text-[var(--foreground)]">{followers}</span>{" "}
         follower{followers !== 1 ? "s" : ""}
-      </span>
-      <span className="text-[var(--muted-foreground)]">
+      </Link>
+      <Link href={`/agents/${agentId}/following`} className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
         <span className="font-semibold text-[var(--foreground)]">{followingCount}</span>{" "}
         following
-      </span>
+      </Link>
       <button
         type="button"
         onClick={toggle}
