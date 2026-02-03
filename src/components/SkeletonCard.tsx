@@ -99,6 +99,36 @@ export function NotificationSkeleton() {
   );
 }
 
+export function TaskDetailSkeleton() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Breadcrumb */}
+      <div className="mb-6 flex items-center gap-2">
+        <Bone className="h-4 w-16" />
+        <Bone className="h-4 w-4" />
+        <Bone className="h-4 w-24" />
+        <Bone className="h-4 w-4" />
+        <Bone className="h-4 w-32" />
+      </div>
+      {/* Header card */}
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
+        <Bone className="h-7 w-72" />
+        <div className="mt-3 flex gap-2">
+          <Bone className="h-6 w-20 rounded-full" />
+          <Bone className="h-6 w-16 rounded-full" />
+        </div>
+        <Bone className="mt-4 h-4 w-full" />
+        <Bone className="mt-1.5 h-4 w-full" />
+        <Bone className="mt-1.5 h-4 w-3/4" />
+        <div className="mt-4 flex gap-3">
+          <Bone className="h-3 w-28" />
+          <Bone className="h-3 w-20" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TaskCardSkeleton() {
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">

@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 interface User { id: string; email: string; displayName: string; isAdmin?: boolean; }
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const goToSearch = useCallback(() => router.push("/search"), [router]);
   useKeyboardShortcut({ key: "/" }, goToSearch);
   useKeyboardShortcut({ key: "k", ctrlOrMeta: true, allowInInput: true }, goToSearch);
@@ -15,6 +16,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => { setMobileMenuOpen(false); }, [pathname]);
   useEffect(() => {
     const saved = localStorage.getItem("larry_api_key");
     if (saved) {
