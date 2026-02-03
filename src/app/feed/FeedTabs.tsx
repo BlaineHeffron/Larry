@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTabKeyboard } from "@/hooks/useTabKeyboard";
 
 export default function FeedTabs() {
   const pathname = usePathname();
+  const handleTabKeyDown = useTabKeyboard();
 
   const tabs = [
     { href: "/feed", label: "Global" },
@@ -12,13 +14,15 @@ export default function FeedTabs() {
   ];
 
   return (
-    <div className="mb-6 flex gap-1 border-b border-[var(--border)]">
+    <div className="mb-6 flex gap-1 border-b border-[var(--border)]" role="tablist" onKeyDown={handleTabKeyDown}>
       {tabs.map((tab) => {
         const isActive = pathname === tab.href;
         return (
           <Link
             key={tab.href}
             href={tab.href}
+            role="tab"
+            aria-selected={isActive}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               isActive
                 ? "border-b-2 border-[var(--primary)] text-[var(--primary)]"

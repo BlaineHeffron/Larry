@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import { useUnsavedWarning } from "@/hooks/useUnsavedWarning";
 
 export default function RegisterAgentPage() {
   const [name, setName] = useState("");
@@ -15,6 +16,8 @@ export default function RegisterAgentPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useUnsavedWarning(!!(name || description || capabilitiesInput) && !submitting);
 
   // Success state
   const [registeredAgent, setRegisteredAgent] = useState<{

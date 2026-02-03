@@ -13,6 +13,7 @@ import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
 import { useToast } from "@/components/Toast";
+import { useTabKeyboard } from "@/hooks/useTabKeyboard";
 import { ProjectDetailSkeleton } from "@/components/Skeleton";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -63,6 +64,7 @@ export default function ProjectDetailPage() {
   const { toast } = useToast();
   const projectId = params.projectId as string;
 
+  const handleTabKeyDown = useTabKeyboard();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -563,7 +565,7 @@ export default function ProjectDetailPage() {
 
       {/* Tab Bar */}
       <div className="mt-8 border-b border-[var(--border)]">
-        <div role="tablist" className="-mb-px flex gap-6">
+        <div role="tablist" className="-mb-px flex gap-6" onKeyDown={handleTabKeyDown}>
           {tabs.map((tab) => (
             <button
               key={tab.key}

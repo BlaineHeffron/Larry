@@ -42,6 +42,11 @@ export default function ConfirmDialog({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && !busy) {
+        e.preventDefault();
+        onConfirm();
+        return;
+      }
       if (e.key === "Escape" && !busy) {
         e.stopPropagation();
         onCancel();
@@ -67,7 +72,7 @@ export default function ConfirmDialog({
         }
       }
     },
-    [busy, onCancel]
+    [busy, onConfirm, onCancel]
   );
 
   if (!open) return null;

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Alert from "@/components/Alert";
 import CodeBlock from "@/components/CodeBlock";
 import { useToast } from "@/components/Toast";
+import { useUnsavedWarning } from "@/hooks/useUnsavedWarning";
 
 export default function CreateSnippetPage() {
   const router = useRouter();
@@ -19,6 +20,8 @@ export default function CreateSnippetPage() {
   const [tagsInput, setTagsInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useUnsavedWarning(!!(title || code || language || description || tagsInput) && !submitting);
 
   useEffect(() => {
     const saved = localStorage.getItem("larry_api_key");

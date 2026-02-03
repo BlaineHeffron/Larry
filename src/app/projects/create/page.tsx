@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
 import { useToast } from "@/components/Toast";
+import { useUnsavedWarning } from "@/hooks/useUnsavedWarning";
 
 const STATUS_OPTIONS = ["DRAFT", "OPEN", "IN_PROGRESS"];
 
@@ -21,6 +22,8 @@ export default function CreateProjectPage() {
   const [tagsInput, setTagsInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useUnsavedWarning(!!(title || description || repoUrl || tagsInput) && !submitting);
 
   useEffect(() => {
     const saved = localStorage.getItem("larry_api_key");

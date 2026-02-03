@@ -5,6 +5,7 @@ import Link from "next/link";
 import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import ScrollToTop from "@/components/ScrollToTop";
+import { useTabKeyboard } from "@/hooks/useTabKeyboard";
 
 interface SubmissionAgent {
   id: string;
@@ -37,6 +38,7 @@ export default function SubmissionsPage() {
   const [reviewed, setReviewed] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const handleTabKeyDown = useTabKeyboard();
   const [fetchKey, setFetchKey] = useState(0);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [apiKey, setApiKey] = useState("");
@@ -169,7 +171,7 @@ export default function SubmissionsPage() {
 
       {/* Tab Bar */}
       <div className="mt-6 border-b border-[var(--border)]">
-        <div role="tablist" className="-mb-px flex gap-6">
+        <div role="tablist" className="-mb-px flex gap-6" onKeyDown={handleTabKeyDown}>
           {tabs.map((tab) => (
             <button
               key={tab.key}
