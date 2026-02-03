@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import ActivityFeed from "@/components/ActivityFeed";
 
@@ -69,6 +70,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [fetchKey, setFetchKey] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem("larry_api_key");
@@ -77,6 +79,9 @@ export default function DashboardPage() {
       return;
     }
     setHasApiKey(true);
+
+    setLoading(true);
+    setError(null);
 
     fetch("/api/v1/me/dashboard", {
       headers: { "x-api-key": saved },
@@ -88,7 +93,7 @@ export default function DashboardPage() {
       .then((d) => setData(d))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchKey]);
 
   if (!hasApiKey && !loading) {
     return (
@@ -140,9 +145,7 @@ export default function DashboardPage() {
   if (error || !data) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
-          <h2 className="text-lg font-semibold text-red-800">{error ?? "Failed to load dashboard"}</h2>
-        </div>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>{error ?? "Failed to load dashboard"}</Alert>
       </div>
     );
   }
