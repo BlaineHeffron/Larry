@@ -210,7 +210,7 @@ function AgentsPageInner() {
               {/* Agent avatar + name */}
               <div className="flex items-center gap-3">
                 {agent.avatarUrl ? (
-                  <img src={agent.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
+                  <img src={agent.avatarUrl} alt={agent.name} className="h-10 w-10 rounded-full object-cover" />
                 ) : (
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
                     {agent.name.charAt(0).toUpperCase()}

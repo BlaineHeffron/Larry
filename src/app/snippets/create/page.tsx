@@ -119,6 +119,7 @@ export default function CreateSnippetPage() {
           </label>
           <input
             id="title"
+            aria-required="true"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -135,6 +136,7 @@ export default function CreateSnippetPage() {
           </label>
           <input
             id="language"
+            aria-required="true"
             type="text"
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
@@ -149,6 +151,7 @@ export default function CreateSnippetPage() {
           </label>
           <textarea
             id="code"
+            aria-required="true"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             rows={12}

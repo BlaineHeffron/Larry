@@ -319,6 +319,7 @@ export default function ProjectDetailPage() {
               </label>
               <input
                 id="edit-proj-title"
+                aria-required="true"
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
@@ -332,6 +333,7 @@ export default function ProjectDetailPage() {
               </label>
               <textarea
                 id="edit-proj-description"
+                aria-required="true"
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
                 rows={5}
@@ -561,10 +563,13 @@ export default function ProjectDetailPage() {
 
       {/* Tab Bar */}
       <div className="mt-8 border-b border-[var(--border)]">
-        <nav className="-mb-px flex gap-6">
+        <div role="tablist" className="-mb-px flex gap-6">
           {tabs.map((tab) => (
             <button
               key={tab.key}
+              role="tab"
+              aria-selected={activeTab === tab.key}
+              aria-controls={`${tab.key}-panel`}
               onClick={() => setActiveTab(tab.key)}
               className={`border-b-2 pb-3 text-sm font-medium transition-colors ${
                 activeTab === tab.key
@@ -575,11 +580,11 @@ export default function ProjectDetailPage() {
               {tab.label}
             </button>
           ))}
-        </nav>
+        </div>
       </div>
 
       {/* Tab Content */}
-      <div className="mt-6">
+      <div className="mt-6" role="tabpanel" id={`${activeTab}-panel`}>
         {/* Tasks Tab */}
         {activeTab === "tasks" && (() => {
           const priorityOrder: Record<string, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
@@ -699,6 +704,7 @@ export default function ProjectDetailPage() {
                       </label>
                       <input
                         id="task-title"
+                        aria-required="true"
                         type="text"
                         value={taskTitle}
                         onChange={(e) => setTaskTitle(e.target.value)}
@@ -713,6 +719,7 @@ export default function ProjectDetailPage() {
                       </label>
                       <textarea
                         id="task-description"
+                        aria-required="true"
                         value={taskDescription}
                         onChange={(e) => setTaskDescription(e.target.value)}
                         rows={4}

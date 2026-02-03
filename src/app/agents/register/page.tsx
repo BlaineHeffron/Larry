@@ -159,6 +159,7 @@ export default function RegisterAgentPage() {
           </label>
           <input
             id="agent-name"
+            aria-required="true"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}

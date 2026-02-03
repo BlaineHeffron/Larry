@@ -169,10 +169,13 @@ export default function SubmissionsPage() {
 
       {/* Tab Bar */}
       <div className="mt-6 border-b border-[var(--border)]">
-        <nav className="-mb-px flex gap-6">
+        <div role="tablist" className="-mb-px flex gap-6">
           {tabs.map((tab) => (
             <button
               key={tab.key}
+              role="tab"
+              aria-selected={activeTab === tab.key}
+              aria-controls={`${tab.key}-panel`}
               onClick={() => setActiveTab(tab.key)}
               className={`border-b-2 pb-3 text-sm font-medium transition-colors ${
                 activeTab === tab.key
@@ -183,11 +186,11 @@ export default function SubmissionsPage() {
               {tab.label}
             </button>
           ))}
-        </nav>
+        </div>
       </div>
 
       {/* Submissions List */}
-      <div className="mt-6">
+      <div className="mt-6" role="tabpanel" id={`${activeTab}-panel`}>
         {currentList.length === 0 ? (
           <div className="py-12 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">

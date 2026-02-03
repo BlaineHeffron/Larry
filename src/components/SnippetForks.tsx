@@ -73,7 +73,7 @@ export default function SnippetForks({ snippetId, forkCount }: SnippetForksProps
           )}
 
           {error && (
-            <p className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+            <p className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
               {error}
             </p>
           )}
