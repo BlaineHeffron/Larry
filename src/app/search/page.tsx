@@ -38,9 +38,14 @@ interface ProjectResult {
 
 interface SearchResults {
   query: string;
+  page: number;
+  limit: number;
   agents?: AgentResult[];
+  agentTotal?: number;
   snippets?: SnippetResult[];
+  snippetTotal?: number;
   projects?: ProjectResult[];
+  projectTotal?: number;
 }
 
 export default function SearchPage() {
@@ -68,9 +73,10 @@ function SearchPageInner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | "agents" | "snippets" | "projects">("all");
+  const [page, setPage] = useState(1);
 
   const doSearch = useCallback(
-    (q: string) => {
+    (q: string, p: number = 1) => {
       if (!q.trim()) {
         setResults(null);
         return;
@@ -78,7 +84,7 @@ function SearchPageInner() {
       setLoading(true);
       setError(null);
 
-      const params = new URLSearchParams({ q: q.trim(), limit: "20" });
+      const params = new URLSearchParams({ q: q.trim(), limit: "10", page: String(p) });
       if (activeTab !== "all") params.set("type", activeTab);
 
       fetch(`/api/v1/search?${params}`)
@@ -100,8 +106,9 @@ function SearchPageInner() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      setPage(1);
       router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-      doSearch(query.trim());
+      doSearch(query.trim(), 1);
     }
   };
 
@@ -110,11 +117,20 @@ function SearchPageInner() {
     (results?.snippets?.length || 0) +
     (results?.projects?.length || 0);
 
+  // Determine which total to use for current tab pagination
+  const activeTotal =
+    activeTab === "agents" ? (results?.agentTotal ?? 0) :
+    activeTab === "snippets" ? (results?.snippetTotal ?? 0) :
+    activeTab === "projects" ? (results?.projectTotal ?? 0) :
+    0;
+  const pageSize = results?.limit ?? 10;
+  const totalPages = activeTab === "all" ? 1 : Math.ceil(activeTotal / pageSize);
+
   const tabs = [
     { key: "all" as const, label: "All" },
-    { key: "agents" as const, label: `Agents${results?.agents ? ` (${results.agents.length})` : ""}` },
-    { key: "snippets" as const, label: `Snippets${results?.snippets ? ` (${results.snippets.length})` : ""}` },
-    { key: "projects" as const, label: `Projects${results?.projects ? ` (${results.projects.length})` : ""}` },
+    { key: "agents" as const, label: `Agents${results?.agentTotal != null ? ` (${results.agentTotal})` : ""}` },
+    { key: "snippets" as const, label: `Snippets${results?.snippetTotal != null ? ` (${results.snippetTotal})` : ""}` },
+    { key: "projects" as const, label: `Projects${results?.projectTotal != null ? ` (${results.projectTotal})` : ""}` },
   ];
 
   return (
@@ -149,7 +165,8 @@ function SearchPageInner() {
               key={tab.key}
               onClick={() => {
                 setActiveTab(tab.key);
-                if (query.trim()) doSearch(query.trim());
+                setPage(1);
+                if (query.trim()) doSearch(query.trim(), 1);
               }}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.key
@@ -316,6 +333,29 @@ function SearchPageInner() {
               </div>
             </section>
           )}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && results && totalPages > 1 && activeTab !== "all" && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <button
+            onClick={() => { const p = page - 1; setPage(p); doSearch(query.trim(), p); }}
+            disabled={page <= 1}
+            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-[var(--muted-foreground)]">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => { const p = page + 1; setPage(p); doSearch(query.trim(), p); }}
+            disabled={page >= totalPages}
+            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
         </div>
       )}
 

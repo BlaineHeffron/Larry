@@ -18,24 +18,38 @@ export async function GET(request: NextRequest) {
       20,
       Math.max(1, parseInt(searchParams.get("limit") || "10", 10))
     );
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const skip = (page - 1) * limit;
 
-    const results: {
-      agents?: unknown[];
-      snippets?: unknown[];
-      projects?: unknown[];
-    } = {};
+    const agentWhere = {
+      isActive: true,
+      OR: [
+        { name: { contains: q, mode: "insensitive" as const } },
+        { description: { contains: q, mode: "insensitive" as const } },
+        { capabilities: { hasSome: [q] } },
+      ],
+    };
+
+    const snippetWhere = {
+      OR: [
+        { title: { contains: q, mode: "insensitive" as const } },
+        { description: { contains: q, mode: "insensitive" as const } },
+        { tags: { hasSome: [q] } },
+      ],
+    };
+
+    const projectWhere = {
+      OR: [
+        { title: { contains: q, mode: "insensitive" as const } },
+        { description: { contains: q, mode: "insensitive" as const } },
+        { tags: { hasSome: [q] } },
+      ],
+    };
 
     const searchAgents =
       !type || type === "agents"
         ? prisma.agent.findMany({
-            where: {
-              isActive: true,
-              OR: [
-                { name: { contains: q, mode: "insensitive" } },
-                { description: { contains: q, mode: "insensitive" } },
-                { capabilities: { hasSome: [q] } },
-              ],
-            },
+            where: agentWhere,
             select: {
               id: true,
               name: true,
@@ -47,20 +61,20 @@ export async function GET(request: NextRequest) {
               createdAt: true,
             },
             orderBy: { reputation: "desc" },
+            skip,
             take: limit,
           })
+        : null;
+
+    const countAgents =
+      !type || type === "agents"
+        ? prisma.agent.count({ where: agentWhere })
         : null;
 
     const searchSnippets =
       !type || type === "snippets"
         ? prisma.snippet.findMany({
-            where: {
-              OR: [
-                { title: { contains: q, mode: "insensitive" } },
-                { description: { contains: q, mode: "insensitive" } },
-                { tags: { hasSome: [q] } },
-              ],
-            },
+            where: snippetWhere,
             select: {
               id: true,
               title: true,
@@ -74,20 +88,20 @@ export async function GET(request: NextRequest) {
               createdAt: true,
             },
             orderBy: { voteCount: "desc" },
+            skip,
             take: limit,
           })
+        : null;
+
+    const countSnippets =
+      !type || type === "snippets"
+        ? prisma.snippet.count({ where: snippetWhere })
         : null;
 
     const searchProjects =
       !type || type === "projects"
         ? prisma.project.findMany({
-            where: {
-              OR: [
-                { title: { contains: q, mode: "insensitive" } },
-                { description: { contains: q, mode: "insensitive" } },
-                { tags: { hasSome: [q] } },
-              ],
-            },
+            where: projectWhere,
             select: {
               id: true,
               title: true,
@@ -101,24 +115,33 @@ export async function GET(request: NextRequest) {
               createdAt: true,
             },
             orderBy: { voteCount: "desc" },
+            skip,
             take: limit,
           })
         : null;
 
-    const [agents, snippets, projects] = await Promise.all([
-      searchAgents,
-      searchSnippets,
-      searchProjects,
-    ]);
+    const countProjects =
+      !type || type === "projects"
+        ? prisma.project.count({ where: projectWhere })
+        : null;
 
-    if (agents) results.agents = agents;
-    if (snippets) results.snippets = snippets;
-    if (projects) results.projects = projects;
+    const [agents, agentTotal, snippets, snippetTotal, projects, projectTotal] =
+      await Promise.all([
+        searchAgents,
+        countAgents,
+        searchSnippets,
+        countSnippets,
+        searchProjects,
+        countProjects,
+      ]);
 
-    return NextResponse.json({
-      query: q,
-      ...results,
-    });
+    const result: Record<string, unknown> = { query: q, page, limit };
+
+    if (agents) { result.agents = agents; result.agentTotal = agentTotal; }
+    if (snippets) { result.snippets = snippets; result.snippetTotal = snippetTotal; }
+    if (projects) { result.projects = projects; result.projectTotal = projectTotal; }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("GET /api/v1/search error:", error);
     return NextResponse.json(
