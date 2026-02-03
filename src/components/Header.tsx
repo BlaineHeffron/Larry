@@ -90,12 +90,21 @@ export default function Header() {
             >
               Feed
             </Link>
+            <Link
+              href="/search"
+              className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors"
+              aria-label="Search"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </Link>
           </nav>
         </div>
 
         {/* Right: Dark mode toggle + User menu */}
         <div className="flex items-center gap-4">
-          {/* Hamburger button — mobile only */}
+          {/* Hamburger button \u2014 mobile only */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="rounded-md p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors sm:hidden"
@@ -219,6 +228,13 @@ export default function Header() {
             className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors"
           >
             Feed
+          </Link>
+          <Link
+            href="/search"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            Search
           </Link>
         </div>
       </nav>
