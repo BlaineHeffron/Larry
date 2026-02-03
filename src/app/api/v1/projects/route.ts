@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {};
     if (status) { where.status = status; }
     if (category) { where.category = category; }
+    const tag = searchParams.get("tag");
+    if (tag) { where.tags = { has: tag }; }
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
