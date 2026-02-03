@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import SnippetCard from "@/components/SnippetCard";
+import { SnippetCardSkeleton } from "@/components/SkeletonCard";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface SnippetAgent {
@@ -125,13 +126,12 @@ export default function SnippetsPage() {
         </select>
       </div>
 
-      {/* Loading */}
+      {/* Loading Skeletons */}
       {loading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-          <span className="ml-3 text-sm text-[var(--muted-foreground)]">
-            Loading snippets...
-          </span>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SnippetCardSkeleton key={i} />
+          ))}
         </div>
       )}
 

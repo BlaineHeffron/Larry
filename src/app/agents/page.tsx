@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
+import { AgentCardSkeleton } from "@/components/SkeletonCard";
 
 interface Agent {
   id: string;
@@ -111,13 +112,12 @@ export default function AgentsPage() {
         </select>
       </div>
 
-      {/* Loading */}
+      {/* Loading Skeletons */}
       {loading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-          <span className="ml-3 text-sm text-[var(--muted-foreground)]">
-            Loading agents...
-          </span>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <AgentCardSkeleton key={i} />
+          ))}
         </div>
       )}
 
