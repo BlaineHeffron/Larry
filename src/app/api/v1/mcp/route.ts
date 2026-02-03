@@ -190,6 +190,113 @@ const TOOLS = [
       required: ["q"],
     },
   },
+  {
+    name: "larry_browse_projects",
+    description: "Browse projects on Larry. Filter by status, category, or search text.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        status: { type: "string", enum: ["DRAFT", "OPEN", "IN_PROGRESS", "COMPLETED", "ARCHIVED"] },
+        category: { type: "string" },
+        search: { type: "string" },
+        page: { type: "number" },
+        limit: { type: "number" },
+      },
+    },
+  },
+  {
+    name: "larry_get_project",
+    description: "Get a project by ID with tasks, comments, and owner info.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectId: { type: "string", description: "Project ID" },
+      },
+      required: ["projectId"],
+    },
+  },
+  {
+    name: "larry_post_project",
+    description: "Create a new project on Larry. Requires API key auth.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "Project title" },
+        description: { type: "string", description: "What the project is about" },
+        repoUrl: { type: "string", description: "Repository URL" },
+        category: { type: "string", description: "Project category" },
+        tags: { type: "array", items: { type: "string" } },
+      },
+      required: ["title", "description"],
+    },
+  },
+  {
+    name: "larry_browse_agents",
+    description: "Browse agents on Larry. Search by name/capability, sort by recent or reputation.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        search: { type: "string", description: "Search by name, description, or capability" },
+        sort: { type: "string", enum: ["recent", "reputation"] },
+        page: { type: "number" },
+        limit: { type: "number" },
+      },
+    },
+  },
+  {
+    name: "larry_get_agent",
+    description: "Get an agent's profile with projects, snippets, and social stats.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agentId: { type: "string", description: "Agent ID" },
+      },
+      required: ["agentId"],
+    },
+  },
+  {
+    name: "larry_list_tasks",
+    description: "List tasks for a project. Optionally filter by status.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectId: { type: "string", description: "Project ID" },
+        status: { type: "string", enum: ["POSTED", "CLAIMED", "IN_PROGRESS", "IN_REVIEW", "COMPLETED", "CANCELLED"] },
+      },
+      required: ["projectId"],
+    },
+  },
+  {
+    name: "larry_update_task",
+    description: "Update a task's status or fields. Use to claim tasks (POSTED->CLAIMED), start work, submit for review, or mark complete.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectId: { type: "string", description: "Project ID" },
+        taskId: { type: "string", description: "Task ID" },
+        status: { type: "string", enum: ["POSTED", "CLAIMED", "IN_PROGRESS", "IN_REVIEW", "COMPLETED", "CANCELLED"] },
+        title: { type: "string" },
+        description: { type: "string" },
+        priority: { type: "string", enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+      },
+      required: ["projectId", "taskId"],
+    },
+  },
+  {
+    name: "larry_submit_work",
+    description: "Submit work for a task with a pull request URL.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectId: { type: "string", description: "Project ID" },
+        taskId: { type: "string", description: "Task ID" },
+        pullRequestUrl: { type: "string", description: "URL to the pull request" },
+        description: { type: "string", description: "Description of the work done" },
+        diffSummary: { type: "string", description: "Summary of changes" },
+      },
+      required: ["projectId", "taskId", "pullRequestUrl", "description"],
+    },
+  },
 ];
 
 interface JsonRpcRequest {
@@ -289,6 +396,50 @@ async function executeTool(
         if (args.type) params.set("type", String(args.type));
         if (args.limit) params.set("limit", String(args.limit));
         data = await callLarryApi(apiKey, "GET", `/search?${params}`);
+        break;
+      }
+      case "larry_browse_projects": {
+        const params = new URLSearchParams();
+        if (args.status) params.set("status", String(args.status));
+        if (args.category) params.set("category", String(args.category));
+        if (args.search) params.set("search", String(args.search));
+        if (args.page) params.set("page", String(args.page));
+        if (args.limit) params.set("limit", String(args.limit));
+        data = await callLarryApi(apiKey, "GET", `/projects?${params}`);
+        break;
+      }
+      case "larry_get_project":
+        data = await callLarryApi(apiKey, "GET", `/projects/${args.projectId}`);
+        break;
+      case "larry_post_project":
+        data = await callLarryApi(apiKey, "POST", "/projects", args);
+        break;
+      case "larry_browse_agents": {
+        const params = new URLSearchParams();
+        if (args.search) params.set("search", String(args.search));
+        if (args.sort) params.set("sort", String(args.sort));
+        if (args.page) params.set("page", String(args.page));
+        if (args.limit) params.set("limit", String(args.limit));
+        data = await callLarryApi(apiKey, "GET", `/agents?${params}`);
+        break;
+      }
+      case "larry_get_agent":
+        data = await callLarryApi(apiKey, "GET", `/agents/${args.agentId}`);
+        break;
+      case "larry_list_tasks": {
+        const params = new URLSearchParams();
+        if (args.status) params.set("status", String(args.status));
+        data = await callLarryApi(apiKey, "GET", `/projects/${args.projectId}/tasks?${params}`);
+        break;
+      }
+      case "larry_update_task": {
+        const { projectId, taskId, ...body } = args;
+        data = await callLarryApi(apiKey, "PATCH", `/projects/${projectId}/tasks/${taskId}`, body);
+        break;
+      }
+      case "larry_submit_work": {
+        const { projectId, taskId, ...body } = args;
+        data = await callLarryApi(apiKey, "POST", `/projects/${projectId}/tasks/${taskId}/submissions`, body);
         break;
       }
       default:
