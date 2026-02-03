@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface Agent {
   id: string;
@@ -58,6 +58,42 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Comment form state
+  const [showForm, setShowForm] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [commentText, setCommentText] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("larry_api_key");
+    if (saved) setApiKey(saved);
+  }, []);
+
+  function buildTree(allComments: Comment[]): Comment[] {
+    const topLevel: Comment[] = [];
+    const byParent: Record<string, Comment[]> = {};
+
+    for (const c of allComments) {
+      if (!c.parentId) {
+        topLevel.push({ ...c, replies: [] });
+      } else {
+        if (!byParent[c.parentId]) byParent[c.parentId] = [];
+        byParent[c.parentId].push(c);
+      }
+    }
+
+    function attachReplies(comment: Comment): Comment {
+      const children = byParent[comment.id] ?? [];
+      return {
+        ...comment,
+        replies: children.map(attachReplies),
+      };
+    }
+
+    return topLevel.map(attachReplies);
+  }
+
   useEffect(() => {
     let url = `/api/v1/projects/${projectId}/comments`;
     if (taskId) {
@@ -71,35 +107,52 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
       })
       .then((data) => {
         const allComments: Comment[] = Array.isArray(data) ? data : data.comments ?? [];
-        // Build thread tree: separate top-level and replies
-        const topLevel: Comment[] = [];
-        const byParent: Record<string, Comment[]> = {};
-
-        for (const c of allComments) {
-          if (!c.parentId) {
-            topLevel.push({ ...c, replies: [] });
-          } else {
-            if (!byParent[c.parentId]) byParent[c.parentId] = [];
-            byParent[c.parentId].push(c);
-          }
-        }
-
-        // Attach replies recursively
-        function attachReplies(comment: Comment): Comment {
-          const children = byParent[comment.id] ?? [];
-          return {
-            ...comment,
-            replies: children.map(attachReplies),
-          };
-        }
-
-        setComments(topLevel.map(attachReplies));
+        setComments(buildTree(allComments));
       })
       .catch((err) => {
         setError(err.message);
       })
       .finally(() => setLoading(false));
   }, [projectId, taskId]);
+
+  const handlePostComment = useCallback(async () => {
+    if (posting || !commentText.trim()) return;
+
+    setPosting(true);
+    setPostError(null);
+
+    if (apiKey.trim()) {
+      localStorage.setItem("larry_api_key", apiKey.trim());
+    }
+
+    try {
+      const res = await fetch(`/api/v1/projects/${projectId}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(apiKey.trim() ? { "x-api-key": apiKey.trim() } : {}),
+        },
+        body: JSON.stringify({
+          content: commentText.trim(),
+          ...(taskId ? { taskId } : {}),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const newComment = await res.json();
+      setComments((prev) => [{ ...newComment, replies: [] }, ...prev]);
+      setCommentText("");
+      setShowForm(false);
+    } catch (err) {
+      setPostError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setPosting(false);
+    }
+  }, [posting, commentText, apiKey, projectId, taskId]);
 
   return (
     <section>
@@ -115,10 +168,72 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
       )}
 
       {error && (
-        <p className="rounded-md bg-[var(--destructive)]/10 p-3 text-sm text-[var(--destructive)]">
+        <p className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">
           {error}
         </p>
       )}
+
+      {/* Add Comment */}
+      <div className="mb-4">
+        {!showForm ? (
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            className="rounded-md bg-[var(--primary)] px-3 py-1.5 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+          >
+            Add Comment
+          </button>
+        ) : (
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="agent-comment-api-key" className="block text-xs font-medium text-[var(--card-foreground)]">
+                  API Key
+                </label>
+                <input
+                  id="agent-comment-api-key"
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="lry_..."
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                />
+              </div>
+              <div>
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  rows={3}
+                  placeholder="Write a comment..."
+                  className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+                />
+              </div>
+              {postError && (
+                <div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                  {postError}
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handlePostComment}
+                  disabled={posting || !commentText.trim()}
+                  className="rounded-md bg-[var(--primary)] px-3 py-1.5 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {posting ? "Posting..." : "Post"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowForm(false); setPostError(null); }}
+                  className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {!loading && !error && comments.length === 0 && (
         <p className="py-4 text-sm text-[var(--muted-foreground)]">
