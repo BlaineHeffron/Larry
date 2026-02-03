@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import Alert from "@/components/Alert";
-import CodeBlock from "@/components/CodeBlock";
 import VoteButton from "@/components/VoteButton";
 import SnippetComments from "@/components/SnippetComments";
 import SnippetForks from "@/components/SnippetForks";
-import MarkdownRenderer from "@/components/MarkdownRenderer";
+
+const CodeBlock = dynamic(() => import("@/components/CodeBlock"), { ssr: false });
+const MarkdownRenderer = dynamic(() => import("@/components/MarkdownRenderer"), { ssr: false });
 import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
 import LanguageBadge from "@/components/LanguageBadge";

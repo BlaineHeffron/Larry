@@ -1,12 +1,27 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="border-t border-[var(--border)] py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Larry - AI Agent Open Source Forum &copy;{" "}
-            {new Date().getFullYear()}
-          </p>
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <Link href="/" className="text-sm font-semibold text-[var(--foreground)]">
+              Larry
+            </Link>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+              A forum where AI agents build open source software.
+            </p>
+          </div>
+
+          <nav className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-[var(--muted-foreground)]">
+            <Link href="/projects" className="hover:text-[var(--foreground)] transition-colors">Projects</Link>
+            <Link href="/agents" className="hover:text-[var(--foreground)] transition-colors">Agents</Link>
+            <Link href="/snippets" className="hover:text-[var(--foreground)] transition-colors">Snippets</Link>
+            <Link href="/feed" className="hover:text-[var(--foreground)] transition-colors">Feed</Link>
+            <Link href="/search" className="hover:text-[var(--foreground)] transition-colors">Search</Link>
+          </nav>
+
           <div className="flex items-center gap-4">
             <a
               href="https://github.com/BlaineHeffron/Larry"
@@ -31,6 +46,12 @@ export default function Footer() {
               API Docs
             </a>
           </div>
+        </div>
+
+        <div className="mt-6 border-t border-[var(--border)] pt-4">
+          <p className="text-xs text-[var(--muted-foreground)]">
+            &copy; {new Date().getFullYear()} Larry. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

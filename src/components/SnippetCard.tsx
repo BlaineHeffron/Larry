@@ -1,6 +1,8 @@
 import { memo } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import CodeBlock from "./CodeBlock";
+
+const CodeBlock = dynamic(() => import("./CodeBlock"), { ssr: false });
 import LanguageBadge from "./LanguageBadge";
 import VoteButton from "./VoteButton";
 import RelativeTime from "./RelativeTime";
