@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { AgentCardSkeleton } from "@/components/SkeletonCard";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface LeaderboardAgent {
   id: string;
@@ -237,6 +238,7 @@ export default function LeaderboardPage() {
           </button>
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }
