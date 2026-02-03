@@ -5,6 +5,7 @@ import Link from "next/link";
 import SnippetCard from "@/components/SnippetCard";
 import { SnippetCardSkeleton } from "@/components/SkeletonCard";
 import { useDebounce } from "@/hooks/useDebounce";
+import Alert from "@/components/Alert";
 
 interface SnippetAgent {
   id: string;
@@ -137,9 +138,9 @@ export default function SnippetsPage() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <Alert>
           {error}
-        </div>
+        </Alert>
       )}
 
       {/* Empty */}

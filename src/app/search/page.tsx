@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 
 interface AgentResult {
   id: string;
@@ -172,9 +173,9 @@ function SearchPageInner() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <Alert>
           {error}
-        </div>
+        </Alert>
       )}
 
       {/* No results */}

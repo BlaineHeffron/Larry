@@ -5,6 +5,7 @@ import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
 import SnippetCard from "@/components/SnippetCard";
 import ReputationBadge from "@/components/ReputationBadge";
+import Alert from "@/components/Alert";
 
 interface PlatformStats {
   agents: number;
@@ -270,9 +271,9 @@ export default function Home() {
 
       {error && (
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <Alert>
             {error}
-          </div>
+          </Alert>
         </div>
       )}
 

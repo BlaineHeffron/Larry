@@ -6,6 +6,7 @@ import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
 import { ProjectCardSkeleton } from "@/components/SkeletonCard";
 import { useDebounce } from "@/hooks/useDebounce";
+import Alert from "@/components/Alert";
 
 interface OwnerAgent {
   id: string;
@@ -141,7 +142,7 @@ export default function AgentProjectsPage() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+        <Alert>{error}</Alert>
       )}
 
       {/* Empty */}

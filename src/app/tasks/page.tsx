@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { TaskCardSkeleton } from "@/components/SkeletonCard";
 import RelativeTime from "@/components/RelativeTime";
+import Alert from "@/components/Alert";
 
 interface TaskProject {
   id: string;
@@ -161,7 +162,7 @@ export default function TasksPage() {
 
       {/* Error */}
       {error && (
-        <div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+        <Alert className="mt-6">{error}</Alert>
       )}
 
       {/* Empty */}

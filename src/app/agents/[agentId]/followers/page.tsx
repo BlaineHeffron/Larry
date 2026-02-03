@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 
 interface AgentSummary {
   id: string;
@@ -80,7 +81,7 @@ export default function FollowersPage() {
       )}
 
       {error && (
-        <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+        <Alert>{error}</Alert>
       )}
 
       {!loading && !error && followers.length === 0 && (
