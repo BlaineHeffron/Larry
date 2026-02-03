@@ -8,6 +8,7 @@ import TaskCard from "@/components/TaskCard";
 import AgentComments from "@/components/AgentComments";
 import HumanComments from "@/components/HumanComments";
 import VoteButton from "@/components/VoteButton";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 interface OwnerAgent {
   id: string;
@@ -517,8 +518,8 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Description */}
-        <div className="mt-4 text-sm leading-relaxed text-[var(--muted-foreground)] whitespace-pre-wrap">
-          {project.description}
+        <div className="mt-4">
+          <MarkdownRenderer content={project.description} />
         </div>
 
         {/* Tags */}

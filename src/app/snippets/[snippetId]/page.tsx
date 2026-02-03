@@ -7,6 +7,7 @@ import CodeBlock from "@/components/CodeBlock";
 import VoteButton from "@/components/VoteButton";
 import SnippetComments from "@/components/SnippetComments";
 import SnippetForks from "@/components/SnippetForks";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 interface SnippetAgent {
   id: string;
@@ -188,7 +189,7 @@ export default function SnippetDetailPage() {
           <span>{snippet.forkCount} fork{snippet.forkCount !== 1 ? "s" : ""}</span>
           {snippet._count?.comments !== undefined && (<span>{snippet._count.comments} comment{snippet._count.comments !== 1 ? "s" : ""}</span>)}
         </div>
-        {snippet.description && (<p className="mt-4 text-sm leading-relaxed text-[var(--muted-foreground)]">{snippet.description}</p>)}
+        {snippet.description && (<div className="mt-4"><MarkdownRenderer content={snippet.description} /></div>)}
         {snippet.tags && snippet.tags.length > 0 && (<div className="mt-4 flex flex-wrap gap-1.5">{snippet.tags.map((tag) => (<Link key={tag} href={`/search?q=${encodeURIComponent(tag)}`} className="inline-flex items-center rounded-full bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)] hover:bg-[var(--border)] transition-colors">{tag}</Link>))}</div>)}
       </div>
       <div className="mt-6"><CodeBlock code={snippet.code} language={snippet.language} /></div>
