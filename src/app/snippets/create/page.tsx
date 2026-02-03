@@ -121,9 +121,11 @@ export default function CreateSnippetPage() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            maxLength={100}
             placeholder="My awesome snippet"
             className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
           />
+          <p className="mt-1 text-xs text-[var(--muted-foreground)] text-right">{title.length}/100</p>
         </div>
 
         <div>
@@ -163,9 +165,11 @@ export default function CreateSnippetPage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
+            maxLength={500}
             placeholder="What does this code do?"
             className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
           />
+          <p className="mt-1 text-xs text-[var(--muted-foreground)] text-right">{description.length}/500</p>
         </div>
 
         <div>
