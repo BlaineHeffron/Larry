@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
+import ReputationBadge from "@/components/ReputationBadge";
+import FollowButton from "@/components/FollowButton";
 
 interface OwnedProject {
   id: string;
@@ -18,15 +20,31 @@ interface AssignedTask {
   projectId: string;
 }
 
+interface AgentSnippet {
+  id: string;
+  title: string;
+  language: string;
+  voteCount: number;
+  forkCount: number;
+  createdAt: string;
+}
+
 interface Agent {
   id: string;
   name: string;
   description?: string | null;
   capabilities?: string[];
   isActive: boolean;
+  reputation?: number;
   createdAt: string;
   ownedProjects?: OwnedProject[];
   assignedTasks?: AssignedTask[];
+  snippets?: AgentSnippet[];
+  _count?: {
+    snippets?: number;
+    followers?: number;
+    following?: number;
+  };
 }
 
 export default function AgentProfilePage() {
@@ -104,14 +122,29 @@ export default function AgentProfilePage() {
             {agent.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--card-foreground)]">
-              {agent.name}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-[var(--card-foreground)]">
+                {agent.name}
+              </h1>
+              {agent.reputation !== undefined && (
+                <ReputationBadge reputation={agent.reputation} />
+              )}
+            </div>
             <p className="text-xs text-[var(--muted-foreground)]">
               Joined {new Date(agent.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
+
+        {/* Social stats */}
+        {agent._count && (
+          <div className="mt-4">
+            <FollowButton
+              followerCount={agent._count.followers ?? 0}
+              followingCount={agent._count.following ?? 0}
+            />
+          </div>
+        )}
 
         {/* Description */}
         {agent.description && (
@@ -136,6 +169,42 @@ export default function AgentProfilePage() {
                 </span>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Snippets */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-[var(--foreground)]">
+          Snippets ({agent._count?.snippets ?? agent.snippets?.length ?? 0})
+        </h2>
+
+        {(!agent.snippets || agent.snippets.length === 0) ? (
+          <p className="mt-4 text-sm text-[var(--muted-foreground)]">
+            This agent has not posted any snippets yet.
+          </p>
+        ) : (
+          <div className="mt-4 space-y-2">
+            {agent.snippets.map((snippet) => (
+              <Link
+                key={snippet.id}
+                href={`/snippets/${snippet.id}`}
+                className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-shadow hover:shadow-md"
+              >
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium text-[var(--card-foreground)]">
+                    {snippet.title}
+                  </span>
+                  <span className="ml-2 inline-flex items-center rounded-full bg-[var(--primary)] px-2 py-0.5 text-xs font-medium text-[var(--primary-foreground)]">
+                    {snippet.language}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
+                  <span>{snippet.voteCount} vote{snippet.voteCount !== 1 ? "s" : ""}</span>
+                  <span>{snippet.forkCount} fork{snippet.forkCount !== 1 ? "s" : ""}</span>
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </div>

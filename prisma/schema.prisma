@@ -15,6 +15,7 @@ model Agent {
   apiKeyHash   String
   apiKeyPrefix String   @unique
   isActive     Boolean  @default(true)
+  reputation   Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -22,6 +23,12 @@ model Agent {
   assignedTasks Task[]          @relation("TaskAssignee")
   comments      AgentComment[]
   submissions   TaskSubmission[]
+  snippets        Snippet[]
+  snippetComments SnippetComment[]
+  votes           Vote[]
+  following     AgentFollow[]   @relation("Follower")
+  followers     AgentFollow[]   @relation("Following")
+  activity      ActivityEvent[]
 }
 
 model HumanUser {
@@ -52,6 +59,7 @@ model Project {
   status      ProjectStatus @default(DRAFT)
   category    String        @default("general")
   tags        String[]      @default([])
+  voteCount   Int           @default(0)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -126,6 +134,7 @@ model TaskSubmission {
 model AgentComment {
   id        String   @id @default(cuid())
   content   String
+  voteCount Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -158,4 +167,99 @@ model HumanComment {
   parentId String?
   parent   HumanComment?  @relation("HumanCommentThread", fields: [parentId], references: [id])
   replies  HumanComment[] @relation("HumanCommentThread")
+}
+
+// ─── Social Features ───────────────────────────────────────────
+
+model Snippet {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  code        String
+  language    String
+  tags        String[] @default([])
+  voteCount   Int      @default(0)
+  forkCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  forkedFromId String?
+  forkedFrom   Snippet?  @relation("SnippetForks", fields: [forkedFromId], references: [id], onDelete: SetNull)
+  forks        Snippet[] @relation("SnippetForks")
+
+  comments SnippetComment[]
+}
+
+model SnippetComment {
+  id        String   @id @default(cuid())
+  content   String
+  voteCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  snippetId String
+  snippet   Snippet @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent   SnippetComment?  @relation("SnippetCommentThread", fields: [parentId], references: [id])
+  replies  SnippetComment[] @relation("SnippetCommentThread")
+}
+
+enum VoteTargetType {
+  PROJECT
+  SNIPPET
+  AGENT_COMMENT
+  SNIPPET_COMMENT
+}
+
+model Vote {
+  id         String         @id @default(cuid())
+  targetType VoteTargetType
+  targetId   String
+  createdAt  DateTime       @default(now())
+
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  @@unique([agentId, targetType, targetId])
+}
+
+model AgentFollow {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  followerId  String
+  follower    Agent  @relation("Follower", fields: [followerId], references: [id])
+
+  followingId String
+  following   Agent  @relation("Following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
+
+enum ActivityEventType {
+  SNIPPET_CREATED
+  SNIPPET_FORKED
+  PROJECT_CREATED
+  COMMENT_POSTED
+  VOTE_CAST
+  FOLLOW
+}
+
+model ActivityEvent {
+  id         String            @id @default(cuid())
+  type       ActivityEventType
+  targetType String
+  targetId   String
+  metadata   Json?
+  createdAt  DateTime          @default(now())
+
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
 }

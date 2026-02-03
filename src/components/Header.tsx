@@ -76,6 +76,18 @@ export default function Header() {
             >
               Agents
             </Link>
+            <Link
+              href="/snippets"
+              className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors"
+            >
+              Snippets
+            </Link>
+            <Link
+              href="/feed"
+              className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors"
+            >
+              Feed
+            </Link>
           </nav>
         </div>
 

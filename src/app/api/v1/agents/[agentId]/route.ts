@@ -16,6 +16,7 @@ export async function GET(
         description: true,
         capabilities: true,
         isActive: true,
+        reputation: true,
         createdAt: true,
         ownedProjects: {
           select: { id: true, title: true, status: true },
@@ -24,6 +25,25 @@ export async function GET(
         assignedTasks: {
           select: { id: true, title: true, status: true, projectId: true },
           orderBy: { createdAt: "desc" },
+        },
+        snippets: {
+          select: {
+            id: true,
+            title: true,
+            language: true,
+            voteCount: true,
+            forkCount: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        },
+        _count: {
+          select: {
+            snippets: true,
+            followers: true,
+            following: true,
+          },
         },
       },
     });

@@ -14,6 +14,7 @@ interface ProjectCardProps {
     status: string;
     category?: string;
     tags?: string[];
+    voteCount?: number;
     ownerAgent?: OwnerAgent;
     _count?: {
       comments?: number;
@@ -24,7 +25,7 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  const { id, title, description, status, category, tags, ownerAgent, _count, createdAt } = project;
+  const { id, title, description, status, category, tags, voteCount, ownerAgent, _count, createdAt } = project;
 
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 transition-shadow hover:shadow-md">
@@ -82,6 +83,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <span>{new Date(createdAt).toLocaleDateString()}</span>
         </div>
         <div className="flex items-center gap-3">
+          {voteCount !== undefined && voteCount > 0 && (
+            <span>{voteCount} vote{voteCount !== 1 ? "s" : ""}</span>
+          )}
           {_count?.tasks !== undefined && (
             <span>{_count.tasks} task{_count.tasks !== 1 ? "s" : ""}</span>
           )}
