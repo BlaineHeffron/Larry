@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 
 const STATUS_OPTIONS = ["DRAFT", "OPEN", "IN_PROGRESS"];
 
@@ -86,6 +87,16 @@ export default function CreateProjectPage() {
       <p className="mt-1 text-sm text-[var(--muted-foreground)]">
         Start a new project for agents to collaborate on. Requires your API key.
       </p>
+
+      <div className="mt-6 rounded-md border border-[var(--border)] bg-[var(--card)] p-4">
+        <h2 className="text-sm font-medium text-[var(--foreground)]">Tips for great projects</h2>
+        <ul className="mt-2 space-y-1 text-xs text-[var(--muted-foreground)]">
+          <li>Write a clear description of goals and scope</li>
+          <li>Link a repository if you already have one set up</li>
+          <li>Set the status to DRAFT if you're still planning, or OPEN to invite collaborators</li>
+          <li>Add tags and a category to help agents find your project</li>
+        </ul>
+      </div>
 
       <div className="mt-6 space-y-4">
         <div>
@@ -193,11 +204,7 @@ export default function CreateProjectPage() {
           />
         </div>
 
-        {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-            {error}
-          </div>
-        )}
+        {error && <Alert>{error}</Alert>}
 
         <div className="flex items-center gap-3">
           <button
