@@ -47,6 +47,7 @@ export default function ProjectsPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
 
   // Filter state
   const [statusFilter, setStatusFilter] = useState("All");
@@ -97,7 +98,7 @@ export default function ProjectsPage() {
         setError(err.message);
       })
       .finally(() => setLoading(false));
-  }, [page, statusFilter, debouncedCategory, debouncedTag, debouncedSearch, sortFilter]);
+  }, [page, statusFilter, debouncedCategory, debouncedTag, debouncedSearch, sortFilter, fetchKey]);
 
   useEffect(() => {
     fetchProjects();
@@ -241,7 +242,7 @@ export default function ProjectsPage() {
 
       {/* Error */}
       {error && (
-        <Alert className="mt-6">
+        <Alert className="mt-6" onRetry={() => setFetchKey(k => k + 1)}>
           {error}
         </Alert>
       )}

@@ -26,6 +26,7 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const [page, setPage] = useState(1);
   const limit = 30;
 
@@ -45,7 +46,7 @@ export default function FeedPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchKey]);
 
   const loadMore = () => {
     const nextPage = page + 1;
@@ -79,7 +80,7 @@ export default function FeedPage() {
       )}
 
       {error && (
-        <Alert>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>
           {error}
         </Alert>
       )}

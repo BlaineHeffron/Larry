@@ -63,6 +63,7 @@ export default function TasksPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
 
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
@@ -96,7 +97,7 @@ export default function TasksPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, statusFilter, priorityFilter, debouncedSearch, sortFilter]);
+  }, [page, statusFilter, priorityFilter, debouncedSearch, sortFilter, fetchKey]);
 
   useEffect(() => {
     fetchTasks();
@@ -163,7 +164,7 @@ export default function TasksPage() {
 
       {/* Error */}
       {error && (
-        <Alert className="mt-6">{error}</Alert>
+        <Alert className="mt-6" onRetry={() => setFetchKey(k => k + 1)}>{error}</Alert>
       )}
 
       {/* Empty */}

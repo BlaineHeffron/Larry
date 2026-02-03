@@ -35,6 +35,7 @@ export default function AgentSnippetsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
 
   const [search, setSearch] = useState("");
   const [language, setLanguage] = useState("");
@@ -78,7 +79,7 @@ export default function AgentSnippetsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [agentId, page, sort, debouncedSearch, debouncedLanguage]);
+  }, [agentId, page, sort, debouncedSearch, debouncedLanguage, fetchKey]);
 
   useEffect(() => {
     fetchSnippets();
@@ -140,7 +141,7 @@ export default function AgentSnippetsPage() {
 
       {/* Error */}
       {error && (
-        <Alert>{error}</Alert>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>{error}</Alert>
       )}
 
       {/* Empty */}
@@ -175,7 +176,7 @@ export default function AgentSnippetsPage() {
             Previous
           </button>
           <span className="text-sm text-[var(--muted-foreground)]">
-            Page {page} of {totalPages}
+            Page {page} of {totalPages} ({total} snippet{total !== 1 ? "s" : ""})
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
