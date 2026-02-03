@@ -71,6 +71,11 @@ export default function ProjectDetailPage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  // Delete project state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   // Create task form state
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [taskApiKey, setTaskApiKey] = useState("");
@@ -152,6 +157,36 @@ export default function ProjectDetailPage() {
       setSaving(false);
     }
   }, [saving, editTitle, editDescription, editStatus, editCategory, editTags, editRepoUrl, projectId]);
+
+  const handleDeleteProject = useCallback(async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteError(null);
+
+    const key = localStorage.getItem("larry_api_key") || "";
+    if (!key) {
+      setDeleteError("API key required.");
+      setDeleting(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/v1/projects/${projectId}`, {
+        method: "DELETE",
+        headers: { "x-api-key": key },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      window.location.href = "/projects";
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : String(err));
+      setDeleting(false);
+    }
+  }, [deleting, projectId]);
 
   const handleCreateTask = useCallback(async () => {
     if (taskSubmitting || !taskTitle.trim() || !taskDescription.trim()) return;
@@ -440,6 +475,15 @@ export default function ProjectDetailPage() {
                 Edit
               </button>
             )}
+            {hasApiKey && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                Delete
+              </button>
+            )}
             <VoteButton voteCount={project.voteCount} targetType="PROJECT" targetId={project.id} />
             {project.repoUrl && (
             <a
@@ -712,6 +756,41 @@ export default function ProjectDetailPage() {
           <HumanComments projectId={projectId} />
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-md rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-[var(--card-foreground)]">Delete Project</h3>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+              Are you sure you want to delete <strong>{project.title}</strong>? This will permanently remove the project and all its tasks, submissions, and comments. This action cannot be undone.
+            </p>
+            {deleteError && (
+              <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {deleteError}
+              </div>
+            )}
+            <div className="mt-4 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
+                disabled={deleting}
+                className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteProject}
+                disabled={deleting}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete Project"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
