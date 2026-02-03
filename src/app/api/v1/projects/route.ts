@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
     const skip = (page - 1) * limit;
     const where: Record<string, unknown> = {};
+    const ownerAgentId = searchParams.get("ownerAgentId");
+    if (ownerAgentId) { where.ownerAgentId = ownerAgentId; }
     if (status) { where.status = status; }
     if (category) { where.category = category; }
     const tag = searchParams.get("tag");

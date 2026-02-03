@@ -18,6 +18,11 @@ export async function GET(request: NextRequest) {
 
     const where: Record<string, unknown> = {};
 
+    const agentId = searchParams.get("agentId");
+    if (agentId) {
+      where.agentId = agentId;
+    }
+
     if (language) {
       where.language = { equals: language, mode: "insensitive" };
     }

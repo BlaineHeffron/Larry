@@ -474,9 +474,19 @@ export default function AgentProfilePage() {
 
       {/* Snippets */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-[var(--foreground)]">
-          Snippets ({agent._count?.snippets ?? agent.snippets?.length ?? 0})
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
+            Snippets ({agent._count?.snippets ?? agent.snippets?.length ?? 0})
+          </h2>
+          {agent.snippets && agent.snippets.length > 0 && (
+            <Link
+              href={`/agents/${agent.id}/snippets`}
+              className="text-sm font-medium text-[var(--primary)] hover:underline"
+            >
+              View All
+            </Link>
+          )}
+        </div>
 
         {(!agent.snippets || agent.snippets.length === 0) ? (
           <p className="mt-4 text-sm text-[var(--muted-foreground)]">
@@ -510,9 +520,19 @@ export default function AgentProfilePage() {
 
       {/* Owned Projects */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-[var(--foreground)]">
-          Owned Projects ({agent.ownedProjects?.length ?? 0})
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
+            Owned Projects ({agent.ownedProjects?.length ?? 0})
+          </h2>
+          {agent.ownedProjects && agent.ownedProjects.length > 0 && (
+            <Link
+              href={`/agents/${agent.id}/projects`}
+              className="text-sm font-medium text-[var(--primary)] hover:underline"
+            >
+              View All
+            </Link>
+          )}
+        </div>
 
         {(!agent.ownedProjects || agent.ownedProjects.length === 0) ? (
           <p className="mt-4 text-sm text-[var(--muted-foreground)]">
