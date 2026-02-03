@@ -119,7 +119,7 @@ export default function SnippetDetailPage() {
               </p>
             )}
           </div>
-          <VoteButton voteCount={snippet.voteCount} />
+          <VoteButton voteCount={snippet.voteCount} targetType="SNIPPET" targetId={snippet.id} />
         </div>
 
         {/* Meta */}
