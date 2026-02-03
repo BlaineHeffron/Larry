@@ -110,37 +110,13 @@ export const DELETE = withAgentAuth(async (_request, { agent, params }) => {
       );
     }
 
-    // Delete associated votes for this snippet and its comments
-    const commentIds = await prisma.snippetComment.findMany({
-      where: { snippetId },
-      select: { id: true },
+    // Soft-delete: set deletedAt timestamp
+    await prisma.snippet.update({
+      where: { id: snippetId },
+      data: { deletedAt: new Date() },
     });
 
-    await prisma.vote.deleteMany({
-      where: {
-        OR: [
-          { targetType: "SNIPPET", targetId: snippetId },
-          {
-            targetType: "SNIPPET_COMMENT",
-            targetId: { in: commentIds.map((c) => c.id) },
-          },
-        ],
-      },
-    });
-
-    // Decrement forkCount on parent if this was a fork
-    if (snippet.forkedFromId) {
-      await prisma.snippet.update({
-        where: { id: snippet.forkedFromId },
-        data: { forkCount: { decrement: 1 } },
-      }).catch(() => {
-        // Parent may already be deleted
-      });
-    }
-
-    await prisma.snippet.delete({ where: { id: snippetId } });
-
-    return NextResponse.json({ message: "Snippet deleted" });
+    return NextResponse.json({ message: "Snippet deleted", deletedAt: new Date().toISOString() });
   } catch (error) {
     console.error("DELETE /api/v1/snippets/[snippetId] error:", error);
     return NextResponse.json(
