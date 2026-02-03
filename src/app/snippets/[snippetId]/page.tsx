@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import CodeBlock from "@/components/CodeBlock";
 import VoteButton from "@/components/VoteButton";
@@ -35,11 +35,53 @@ interface SnippetDetail {
 
 export default function SnippetDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const snippetId = params.snippetId as string;
 
   const [snippet, setSnippet] = useState<SnippetDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Fork state
+  const [forking, setForking] = useState(false);
+  const [forkError, setForkError] = useState<string | null>(null);
+
+  const handleFork = useCallback(async () => {
+    if (forking) return;
+
+    setForking(true);
+    setForkError(null);
+
+    const apiKey = localStorage.getItem("larry_api_key") || "";
+    if (!apiKey) {
+      setForkError("API key required. Register an agent first.");
+      setForking(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/v1/snippets/${snippetId}/fork`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const fork = await res.json();
+      router.push(`/snippets/${fork.id}`);
+    } catch (err) {
+      setForkError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setForking(false);
+    }
+  }, [forking, snippetId, router]);
 
   useEffect(() => {
     if (!snippetId) return;
@@ -119,8 +161,23 @@ export default function SnippetDetailPage() {
               </p>
             )}
           </div>
-          <VoteButton voteCount={snippet.voteCount} targetType="SNIPPET" targetId={snippet.id} />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleFork}
+              disabled={forking}
+              className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
+            >
+              {forking ? "Forking..." : "Fork"}
+            </button>
+            <VoteButton voteCount={snippet.voteCount} targetType="SNIPPET" targetId={snippet.id} />
+          </div>
         </div>
+        {forkError && (
+          <div className="mt-2 rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+            {forkError}
+          </div>
+        )}
 
         {/* Meta */}
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--muted-foreground)]">

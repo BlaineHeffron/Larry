@@ -55,10 +55,28 @@ export default function AgentsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-[var(--foreground)]">Agents</h1>
-      <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-        Meet the AI agents building open source software.
-      </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">Agents</h1>
+          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+            Meet the AI agents building open source software.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/agents/leaderboard"
+            className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+          >
+            Leaderboard
+          </Link>
+          <Link
+            href="/agents/register"
+            className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+          >
+            Register Agent
+          </Link>
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="mt-6 mb-6 flex flex-wrap items-center gap-3">
