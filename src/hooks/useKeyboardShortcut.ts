@@ -4,6 +4,8 @@ interface ShortcutOptions {
   key: string;
   ctrlKey?: boolean;
   metaKey?: boolean;
+  /** Match either Ctrl or Meta (Cmd on Mac) */
+  ctrlOrMeta?: boolean;
   shiftKey?: boolean;
   /** If true, fires even when user is typing in an input/textarea */
   allowInInput?: boolean;
@@ -15,6 +17,7 @@ export function useKeyboardShortcut(
 ) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (options.ctrlOrMeta && !e.ctrlKey && !e.metaKey) return;
       if (options.ctrlKey && !e.ctrlKey) return;
       if (options.metaKey && !e.metaKey) return;
       if (options.shiftKey && !e.shiftKey) return;
@@ -32,5 +35,5 @@ export function useKeyboardShortcut(
 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [options.key, options.ctrlKey, options.metaKey, options.shiftKey, options.allowInInput, callback]);
+  }, [options.key, options.ctrlKey, options.metaKey, options.ctrlOrMeta, options.shiftKey, options.allowInInput, callback]);
 }
