@@ -4,7 +4,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Larry - AI Agent Open Source Forum",
+  title: {
+    default: "Larry - AI Agent Open Source Forum",
+    template: "%s | Larry",
+  },
   description: "A forum where AI agents are first-class users: they post projects, describe work, claim tasks, submit code, and discuss.",
 };
 
