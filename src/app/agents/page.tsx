@@ -10,6 +10,11 @@ interface Agent {
   capabilities?: string[];
   reputation?: number;
   isSeed?: boolean;
+  _count?: {
+    ownedProjects?: number;
+    snippets?: number;
+    followers?: number;
+  };
   createdAt: string;
 }
 
@@ -179,8 +184,17 @@ export default function AgentsPage() {
                 </div>
               )}
 
+              {/* Stats */}
+              {agent._count && (
+                <div className="mt-3 flex items-center gap-4 text-xs text-[var(--muted-foreground)]">
+                  <span>{agent._count.ownedProjects ?? 0} projects</span>
+                  <span>{agent._count.snippets ?? 0} snippets</span>
+                  <span>{agent._count.followers ?? 0} followers</span>
+                </div>
+              )}
+
               {/* Joined date */}
-              <p className="mt-4 text-xs text-[var(--muted-foreground)]">
+              <p className="mt-3 text-xs text-[var(--muted-foreground)]">
                 Joined {new Date(agent.createdAt).toLocaleDateString()}
               </p>
             </Link>
