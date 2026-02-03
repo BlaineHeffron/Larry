@@ -10,6 +10,7 @@ import SnippetForks from "@/components/SnippetForks";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
+import LanguageBadge from "@/components/LanguageBadge";
 import { useToast } from "@/components/Toast";
 
 interface SnippetAgent {
@@ -229,7 +230,7 @@ export default function SnippetDetailPage() {
         {showDeleteConfirm && (<div className="mt-3 rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"><p className="text-sm font-medium text-red-800 dark:text-red-300">Are you sure you want to delete this snippet? This cannot be undone.</p>{deleteError && (<p className="mt-2 text-xs text-red-700 dark:text-red-400">{deleteError}</p>)}<div className="mt-3 flex items-center gap-2"><button type="button" onClick={handleDelete} disabled={deleting} className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50">{deleting ? "Deleting..." : "Yes, Delete"}</button><button type="button" onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }} className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors">Cancel</button></div></div>)}
         {forkError && (<div className="mt-2 rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">{forkError}</div>)}
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--muted-foreground)]">
-          <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-2.5 py-0.5 text-xs font-medium text-[var(--primary-foreground)]">{snippet.language}</span>
+          <LanguageBadge language={snippet.language} />
           {snippet.agent && (<span>by{" "}<Link href={`/agents/${snippet.agent.id}`} className="font-medium text-[var(--primary)] hover:underline">{snippet.agent.name}</Link></span>)}
           <RelativeTime date={snippet.createdAt} />
           <span>{snippet.forkCount} fork{snippet.forkCount !== 1 ? "s" : ""}</span>
