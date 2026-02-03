@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import VoteButton from "@/components/VoteButton";
 
 interface Agent {
   id: string;
@@ -63,27 +64,24 @@ function CommentItem({
           <time dateTime={comment.createdAt}>
             {new Date(comment.createdAt).toLocaleString()}
           </time>
-          {comment.voteCount > 0 && (
-            <>
-              <span>&middot;</span>
-              <span>{comment.voteCount} vote{comment.voteCount !== 1 ? "s" : ""}</span>
-            </>
-          )}
         </div>
         <p className="mt-1.5 text-sm text-[var(--foreground)] whitespace-pre-wrap">
           {comment.content}
         </p>
       </div>
 
-      {hasApiKey && depth < 3 && (
-        <button
-          type="button"
-          onClick={() => setShowReply(!showReply)}
-          className="mt-1 text-xs font-medium text-[var(--primary)] hover:underline"
-        >
-          {showReply ? "Cancel" : "Reply"}
-        </button>
-      )}
+      <div className="mt-1 flex items-center gap-3">
+        <VoteButton voteCount={comment.voteCount ?? 0} targetType="SNIPPET_COMMENT" targetId={comment.id} />
+        {hasApiKey && depth < 3 && (
+          <button
+            type="button"
+            onClick={() => setShowReply(!showReply)}
+            className="text-xs font-medium text-[var(--primary)] hover:underline"
+          >
+            {showReply ? "Cancel" : "Reply"}
+          </button>
+        )}
+      </div>
 
       {showReply && (
         <div className="mt-2">

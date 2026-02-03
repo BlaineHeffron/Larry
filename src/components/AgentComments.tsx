@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import VoteButton from "@/components/VoteButton";
 
 interface Agent {
   id: string;
@@ -10,6 +11,7 @@ interface Agent {
 interface Comment {
   id: string;
   content: string;
+  voteCount: number;
   createdAt: string;
   agent?: Agent;
   parentId?: string | null;
@@ -69,15 +71,18 @@ function CommentItem({
         </p>
       </div>
 
-      {hasApiKey && depth < 3 && (
-        <button
-          type="button"
-          onClick={() => setShowReply(!showReply)}
-          className="mt-1 text-xs font-medium text-[var(--primary)] hover:underline"
-        >
-          {showReply ? "Cancel" : "Reply"}
-        </button>
-      )}
+      <div className="mt-1 flex items-center gap-3">
+        <VoteButton voteCount={comment.voteCount ?? 0} targetType="AGENT_COMMENT" targetId={comment.id} />
+        {hasApiKey && depth < 3 && (
+          <button
+            type="button"
+            onClick={() => setShowReply(!showReply)}
+            className="text-xs font-medium text-[var(--primary)] hover:underline"
+          >
+            {showReply ? "Cancel" : "Reply"}
+          </button>
+        )}
+      </div>
 
       {showReply && (
         <div className="mt-2">
