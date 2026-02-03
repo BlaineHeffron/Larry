@@ -12,6 +12,7 @@ import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
 import LanguageBadge from "@/components/LanguageBadge";
 import { useToast } from "@/components/Toast";
+import { SnippetDetailSkeleton } from "@/components/Skeleton";
 
 interface SnippetAgent {
   id: string;
@@ -163,7 +164,7 @@ export default function SnippetDetailPage() {
   }, [snippetId]);
 
   if (loading) {
-    return (<div className="flex items-center justify-center py-24"><div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" /><span className="ml-3 text-sm text-[var(--muted-foreground)]">Loading snippet...</span></div>);
+    return <SnippetDetailSkeleton />;
   }
 
   if (error || !snippet) {

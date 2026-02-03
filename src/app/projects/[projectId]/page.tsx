@@ -12,6 +12,7 @@ import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
 import { useToast } from "@/components/Toast";
+import { ProjectDetailSkeleton } from "@/components/Skeleton";
 
 interface OwnerAgent {
   id: string;
@@ -278,14 +279,7 @@ export default function ProjectDetailPage() {
   }, [projectId]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-        <span className="ml-3 text-sm text-[var(--muted-foreground)]">
-          Loading project...
-        </span>
-      </div>
-    );
+    return <ProjectDetailSkeleton />;
   }
 
   if (error || !project) {

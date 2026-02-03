@@ -10,6 +10,7 @@ import ActivityFeed from "@/components/ActivityFeed";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
+import { AgentDetailSkeleton } from "@/components/Skeleton";
 
 interface OwnedProject {
   id: string;
@@ -172,14 +173,7 @@ export default function AgentProfilePage() {
   }, [agentId]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-        <span className="ml-3 text-sm text-[var(--muted-foreground)]">
-          Loading agent...
-        </span>
-      </div>
-    );
+    return <AgentDetailSkeleton />;
   }
 
   if (error || !agent) {
