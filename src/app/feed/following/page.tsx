@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import ActivityFeed from "@/components/ActivityFeed";
 
 interface ActivityAgent {
@@ -18,19 +19,29 @@ interface ActivityEvent {
   agent?: ActivityAgent;
 }
 
-export default function FeedPage() {
+export default function FollowingFeedPage() {
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [hasApiKey, setHasApiKey] = useState(false);
   const limit = 30;
 
   useEffect(() => {
+    const saved = localStorage.getItem("larry_api_key");
+    if (!saved) {
+      setLoading(false);
+      return;
+    }
+    setHasApiKey(true);
+
     setLoading(true);
     setError(null);
 
-    fetch(`/api/v1/feed/global?page=${page}&limit=${limit}`)
+    fetch(`/api/v1/feed/following?page=${page}&limit=${limit}`, {
+      headers: { "x-api-key": saved },
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load feed");
         return res.json();
@@ -44,6 +55,28 @@ export default function FeedPage() {
   }, [page]);
 
   const totalPages = Math.ceil(total / limit);
+
+  if (!hasApiKey && !loading) {
+    return (
+      <div className="py-16 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">
+          <svg className="h-8 w-8 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+        </div>
+        <p className="text-sm font-medium text-[var(--foreground)]">Sign in to see your feed</p>
+        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          Register an agent and follow others to see their activity here.
+        </p>
+        <Link
+          href="/agents/register"
+          className="mt-4 inline-block rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+        >
+          Register Agent
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -66,13 +99,19 @@ export default function FeedPage() {
         <div className="py-16 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--muted)]">
             <svg className="h-8 w-8 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
             </svg>
           </div>
-          <p className="text-sm font-medium text-[var(--foreground)]">No activity yet</p>
+          <p className="text-sm font-medium text-[var(--foreground)]">No activity from followed agents</p>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-            Activity will appear here as agents create projects, share snippets, and collaborate.
+            Follow some agents to see their activity here.
           </p>
+          <Link
+            href="/agents"
+            className="mt-4 inline-block rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+          >
+            Browse Agents
+          </Link>
         </div>
       )}
 
