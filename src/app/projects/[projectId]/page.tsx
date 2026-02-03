@@ -58,6 +58,18 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("tasks");
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  // Edit project state
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editStatus, setEditStatus] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editTags, setEditTags] = useState("");
+  const [editRepoUrl, setEditRepoUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Create task form state
   const [showTaskForm, setShowTaskForm] = useState(false);
@@ -74,8 +86,72 @@ export default function ProjectDetailPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("larry_api_key");
-    if (saved) setTaskApiKey(saved);
+    if (saved) {
+      setTaskApiKey(saved);
+      setHasApiKey(true);
+    }
   }, []);
+
+  const startEditing = useCallback(() => {
+    if (!project) return;
+    setEditTitle(project.title);
+    setEditDescription(project.description);
+    setEditStatus(project.status);
+    setEditCategory(project.category || "");
+    setEditTags(project.tags?.join(", ") || "");
+    setEditRepoUrl(project.repoUrl || "");
+    setSaveError(null);
+    setEditing(true);
+  }, [project]);
+
+  const handleSaveProject = useCallback(async () => {
+    if (saving || !editTitle.trim() || !editDescription.trim()) return;
+
+    setSaving(true);
+    setSaveError(null);
+
+    const apiKey = localStorage.getItem("larry_api_key") || "";
+    if (!apiKey) {
+      setSaveError("API key required.");
+      setSaving(false);
+      return;
+    }
+
+    try {
+      const tags = editTags.trim()
+        ? editTags.split(",").map((t) => t.trim()).filter(Boolean)
+        : undefined;
+
+      const res = await fetch(`/api/v1/projects/${projectId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+          status: editStatus,
+          ...(editCategory.trim() ? { category: editCategory.trim() } : {}),
+          ...(tags ? { tags } : {}),
+          repoUrl: editRepoUrl.trim() || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const updated = await res.json();
+      setProject((prev) => (prev ? { ...prev, ...updated } : prev));
+      setEditing(false);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
+    }
+  }, [saving, editTitle, editDescription, editStatus, editCategory, editTags, editRepoUrl, projectId]);
 
   const handleCreateTask = useCallback(async () => {
     if (taskSubmitting || !taskTitle.trim() || !taskDescription.trim()) return;
@@ -183,6 +259,137 @@ export default function ProjectDetailPage() {
     );
   }
 
+  if (editing) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <nav className="mb-6 text-sm text-[var(--muted-foreground)]">
+          <Link href="/projects" className="hover:text-[var(--primary)]">
+            Projects
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-[var(--foreground)]">Edit Project</span>
+        </nav>
+
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
+          <h2 className="text-xl font-bold text-[var(--card-foreground)]">Edit Project</h2>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label htmlFor="edit-proj-title" className="block text-sm font-medium text-[var(--card-foreground)]">
+                Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="edit-proj-title"
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="edit-proj-description" className="block text-sm font-medium text-[var(--card-foreground)]">
+                Description <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="edit-proj-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={5}
+                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="edit-proj-status" className="block text-sm font-medium text-[var(--card-foreground)]">
+                  Status
+                </label>
+                <select
+                  id="edit-proj-status"
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                >
+                  <option value="DRAFT">Draft</option>
+                  <option value="OPEN">Open</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="ARCHIVED">Archived</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="edit-proj-category" className="block text-sm font-medium text-[var(--card-foreground)]">
+                  Category
+                </label>
+                <input
+                  id="edit-proj-category"
+                  type="text"
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  placeholder="e.g. web, cli, library"
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="edit-proj-tags" className="block text-sm font-medium text-[var(--card-foreground)]">
+                Tags <span className="text-xs font-normal text-[var(--muted-foreground)]">(comma-separated)</span>
+              </label>
+              <input
+                id="edit-proj-tags"
+                type="text"
+                value={editTags}
+                onChange={(e) => setEditTags(e.target.value)}
+                placeholder="nextjs, typescript, ai"
+                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="edit-proj-repo" className="block text-sm font-medium text-[var(--card-foreground)]">
+                Repository URL
+              </label>
+              <input
+                id="edit-proj-repo"
+                type="url"
+                value={editRepoUrl}
+                onChange={(e) => setEditRepoUrl(e.target.value)}
+                placeholder="https://github.com/owner/repo"
+                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+              />
+            </div>
+
+            {saveError && (
+              <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {saveError}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSaveProject}
+                disabled={saving || !editTitle.trim() || !editDescription.trim()}
+                className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEditing(false); setSaveError(null); }}
+                className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const tabs: { key: Tab; label: string }[] = [
     { key: "tasks", label: `Tasks (${project.tasks?.length ?? 0})` },
     {
@@ -224,6 +431,15 @@ export default function ProjectDetailPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {hasApiKey && (
+              <button
+                type="button"
+                onClick={startEditing}
+                className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              >
+                Edit
+              </button>
+            )}
             <VoteButton voteCount={project.voteCount} targetType="PROJECT" targetId={project.id} />
             {project.repoUrl && (
             <a
