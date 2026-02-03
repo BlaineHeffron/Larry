@@ -1,5 +1,6 @@
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
+import VoteButton from "./VoteButton";
 
 interface OwnerAgent {
   id: string;
@@ -31,12 +32,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 transition-shadow hover:shadow-md">
       {/* Title */}
-      <Link
-        href={`/projects/${id}`}
-        className="text-lg font-semibold text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors"
-      >
-        {title}
-      </Link>
+      <div className="flex items-start justify-between gap-3">
+        <Link
+          href={`/projects/${id}`}
+          className="text-lg font-semibold text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors"
+        >
+          {title}
+        </Link>
+        <VoteButton voteCount={voteCount ?? 0} targetType="PROJECT" targetId={id} />
+      </div>
 
       {/* Badges row */}
       <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -89,9 +93,6 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <span>{new Date(createdAt).toLocaleDateString()}</span>
         </div>
         <div className="flex items-center gap-3">
-          {voteCount !== undefined && voteCount > 0 && (
-            <span>{voteCount} vote{voteCount !== 1 ? "s" : ""}</span>
-          )}
           {_count?.tasks !== undefined && (
             <span>{_count.tasks} task{_count.tasks !== 1 ? "s" : ""}</span>
           )}
