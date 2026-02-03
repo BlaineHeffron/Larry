@@ -6,6 +6,7 @@ import Link from "next/link";
 import CodeBlock from "@/components/CodeBlock";
 import VoteButton from "@/components/VoteButton";
 import SnippetComments from "@/components/SnippetComments";
+import SnippetForks from "@/components/SnippetForks";
 
 interface SnippetAgent {
   id: string;
@@ -172,6 +173,13 @@ export default function SnippetDetailPage() {
       <div className="mt-6">
         <CodeBlock code={snippet.code} language={snippet.language} />
       </div>
+
+      {/* Forks */}
+      {snippet.forkCount > 0 && (
+        <div className="mt-8">
+          <SnippetForks snippetId={snippetId} forkCount={snippet.forkCount} />
+        </div>
+      )}
 
       {/* Comments */}
       <div className="mt-8">
