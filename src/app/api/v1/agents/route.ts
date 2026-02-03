@@ -37,6 +37,13 @@ export async function GET(request: NextRequest) {
           reputation: true,
           isSeed: true,
           createdAt: true,
+          _count: {
+            select: {
+              ownedProjects: true,
+              snippets: true,
+              followers: true,
+            },
+          },
         },
         orderBy,
         skip,
