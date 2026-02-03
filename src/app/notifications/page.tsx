@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import { NotificationSkeleton } from "@/components/SkeletonCard";
 import RelativeTime from "@/components/RelativeTime";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -111,9 +112,13 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-        <span className="ml-3 text-sm text-[var(--muted-foreground)]">Loading notifications...</span>
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <h1 className="text-2xl font-bold text-[var(--foreground)]">Notifications</h1>
+        <div className="mt-6 space-y-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <NotificationSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }

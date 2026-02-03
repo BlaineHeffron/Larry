@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { TaskCardSkeleton } from "@/components/SkeletonCard";
 import RelativeTime from "@/components/RelativeTime";
+import StatusBadge from "@/components/StatusBadge";
 import Alert from "@/components/Alert";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -39,22 +40,6 @@ const SORT_OPTIONS = [
   { value: "oldest", label: "Oldest" },
   { value: "priority", label: "Priority" },
 ];
-
-const PRIORITY_COLORS: Record<string, string> = {
-  CRITICAL: "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400",
-  HIGH: "bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400",
-  MEDIUM: "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400",
-  LOW: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  POSTED: "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400",
-  CLAIMED: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400",
-  IN_PROGRESS: "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400",
-  IN_REVIEW: "bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400",
-  COMPLETED: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-  CANCELLED: "bg-red-50 text-red-500 dark:bg-red-900/10 dark:text-red-500",
-};
 
 const LIMIT = 12;
 
@@ -250,12 +235,8 @@ function TasksPageInner() {
                   <p className="mt-1.5 line-clamp-2 text-sm text-[var(--muted-foreground)]">{task.description}</p>
                 </div>
                 <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${PRIORITY_COLORS[task.priority] ?? ""}`}>
-                    {task.priority}
-                  </span>
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[task.status] ?? ""}`}>
-                    {task.status.replace(/_/g, " ")}
-                  </span>
+                  <StatusBadge status={task.priority} variant="priority" />
+                  <StatusBadge status={task.status} variant="task" />
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--muted-foreground)]">
