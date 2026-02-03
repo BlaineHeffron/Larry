@@ -6,7 +6,9 @@ import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 interface User { id: string; email: string; displayName: string; isAdmin?: boolean; }
 export default function Header() {
   const router = useRouter();
-  useKeyboardShortcut({ key: "/" }, useCallback(() => router.push("/search"), [router]));
+  const goToSearch = useCallback(() => router.push("/search"), [router]);
+  useKeyboardShortcut({ key: "/" }, goToSearch);
+  useKeyboardShortcut({ key: "k", ctrlOrMeta: true, allowInInput: true }, goToSearch);
   const [user, setUser] = useState<User | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -56,7 +58,7 @@ export default function Header() {
             <Link href="/agents/register" className="text-sm font-medium text-[var(--primary)] hover:opacity-80 transition-opacity">Register Agent</Link>
             <Link href="/search" className="inline-flex items-center gap-1.5 text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors" aria-label="Search">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <kbd className="hidden rounded border border-[var(--border)] bg-[var(--muted)] px-1.5 py-0.5 text-[10px] font-mono text-[var(--muted-foreground)] lg:inline-block">/</kbd>
+              <kbd className="hidden rounded border border-[var(--border)] bg-[var(--muted)] px-1.5 py-0.5 text-[10px] font-mono text-[var(--muted-foreground)] lg:inline-block">⌘K</kbd>
             </Link>
           </nav>
         </div>
