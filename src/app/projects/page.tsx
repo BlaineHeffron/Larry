@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
+import { useDebounce } from "@/hooks/useDebounce";
+
+
 
 interface OwnerAgent {
   id: string;
@@ -49,6 +52,13 @@ export default function ProjectsPage() {
   const [searchFilter, setSearchFilter] = useState("");
   const [sortFilter, setSortFilter] = useState("recent");
 
+  const debouncedCategory = useDebounce(categoryFilter, 300);
+  const debouncedTag = useDebounce(tagFilter, 300);
+  const debouncedSearch = useDebounce(searchFilter, 300);
+
+  // Reset to page 1 when debounced text filters change
+  useEffect(() => { setPage(1); }, [debouncedCategory, debouncedTag, debouncedSearch]);
+
   const fetchProjects = useCallback(() => {
     setLoading(true);
     setError(null);
@@ -61,14 +71,14 @@ export default function ProjectsPage() {
     if (statusFilter !== "All") {
       params.set("status", statusFilter);
     }
-    if (categoryFilter.trim()) {
-      params.set("category", categoryFilter.trim());
+    if (debouncedCategory.trim()) {
+      params.set("category", debouncedCategory.trim());
     }
-    if (tagFilter.trim()) {
-      params.set("tag", tagFilter.trim());
+    if (debouncedTag.trim()) {
+      params.set("tag", debouncedTag.trim());
     }
-    if (searchFilter.trim()) {
-      params.set("search", searchFilter.trim());
+    if (debouncedSearch.trim()) {
+      params.set("search", debouncedSearch.trim());
     }
 
     fetch(`/api/v1/projects?${params.toString()}`)
@@ -84,30 +94,14 @@ export default function ProjectsPage() {
         setError(err.message);
       })
       .finally(() => setLoading(false));
-  }, [page, statusFilter, categoryFilter, tagFilter, searchFilter, sortFilter]);
+  }, [page, statusFilter, debouncedCategory, debouncedTag, debouncedSearch, sortFilter]);
 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
 
-  // Reset to page 1 when filters change
   const handleStatusChange = (value: string) => {
     setStatusFilter(value);
-    setPage(1);
-  };
-
-  const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value);
-    setPage(1);
-  };
-
-  const handleTagChange = (value: string) => {
-    setTagFilter(value);
-    setPage(1);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearchFilter(value);
     setPage(1);
   };
 
@@ -171,7 +165,7 @@ export default function ProjectsPage() {
             id="category-filter"
             type="text"
             value={categoryFilter}
-            onChange={(e) => handleCategoryChange(e.target.value)}
+            onChange={(e) => setCategoryFilter(e.target.value)}
             placeholder="e.g. web, cli, library"
             className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           />
@@ -189,7 +183,7 @@ export default function ProjectsPage() {
             id="tag-filter"
             type="text"
             value={tagFilter}
-            onChange={(e) => handleTagChange(e.target.value)}
+            onChange={(e) => setTagFilter(e.target.value)}
             placeholder="Filter by tag..."
             className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           />
@@ -207,7 +201,7 @@ export default function ProjectsPage() {
             id="search-filter"
             type="text"
             value={searchFilter}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => setSearchFilter(e.target.value)}
             placeholder="Search projects..."
             className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           />
@@ -258,7 +252,7 @@ export default function ProjectsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
             </svg>
           </div>
-          {(statusFilter !== "All" || categoryFilter || tagFilter || searchFilter) ? (
+          {(statusFilter !== "All" || debouncedCategory || debouncedTag || debouncedSearch) ? (
             <>
               <p className="text-sm font-medium text-[var(--foreground)]">No projects match your filters</p>
               <p className="mt-1 text-sm text-[var(--muted-foreground)]">Try broadening your search or clearing some filters.</p>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import SnippetCard from "@/components/SnippetCard";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface SnippetAgent {
   id: string;
@@ -37,6 +38,12 @@ export default function SnippetsPage() {
   const [page, setPage] = useState(1);
   const limit = 12;
 
+  const debouncedSearch = useDebounce(search, 300);
+  const debouncedLanguage = useDebounce(language, 300);
+  const debouncedTag = useDebounce(tag, 300);
+
+  useEffect(() => { setPage(1); }, [debouncedSearch, debouncedLanguage, debouncedTag]);
+
   const fetchSnippets = useCallback(() => {
     setLoading(true);
     setError(null);
@@ -45,9 +52,9 @@ export default function SnippetsPage() {
     params.set("page", String(page));
     params.set("limit", String(limit));
     params.set("sort", sort);
-    if (search) params.set("search", search);
-    if (language) params.set("language", language);
-    if (tag) params.set("tag", tag);
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (debouncedLanguage) params.set("language", debouncedLanguage);
+    if (debouncedTag) params.set("tag", debouncedTag);
 
     fetch(`/api/v1/snippets?${params}`)
       .then((res) => {
@@ -60,7 +67,7 @@ export default function SnippetsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, sort, search, language, tag]);
+  }, [page, sort, debouncedSearch, debouncedLanguage, debouncedTag]);
 
   useEffect(() => {
     fetchSnippets();
@@ -87,30 +94,21 @@ export default function SnippetsPage() {
         <input
           type="text"
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="Search snippets..."
           className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
         />
         <input
           type="text"
           value={language}
-          onChange={(e) => {
-            setLanguage(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setLanguage(e.target.value)}
           placeholder="Language..."
           className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
         />
         <input
           type="text"
           value={tag}
-          onChange={(e) => {
-            setTag(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setTag(e.target.value)}
           placeholder="Filter by tag..."
           className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
         />
