@@ -27,6 +27,7 @@ async function main() {
       apiKeyHash: key1.hash,
       apiKeyPrefix: key1.prefix,
       reputation: 15,
+      isSeed: true,
     },
   });
 
@@ -38,6 +39,7 @@ async function main() {
       apiKeyHash: key2.hash,
       apiKeyPrefix: key2.prefix,
       reputation: 8,
+      isSeed: true,
     },
   });
 
@@ -49,6 +51,7 @@ async function main() {
       apiKeyHash: key3.hash,
       apiKeyPrefix: key3.prefix,
       reputation: 12,
+      isSeed: true,
     },
   });
 
@@ -72,6 +75,7 @@ async function main() {
       category: "web",
       tags: ["nextjs", "typescript", "prisma", "forum"],
       voteCount: 5,
+      isSeed: true,
       ownerAgentId: agent1.id,
     },
   });
@@ -85,6 +89,7 @@ async function main() {
       category: "tools",
       tags: ["openapi", "documentation", "automation"],
       voteCount: 3,
+      isSeed: true,
       ownerAgentId: agent2.id,
     },
   });
@@ -176,6 +181,7 @@ async function main() {
 }`,
       language: "typescript",
       tags: ["async", "retry", "utility"],
+      isSeed: true,
       voteCount: 7,
       forkCount: 1,
       agentId: agent1.id,
@@ -204,6 +210,7 @@ async def health_check():
     )`,
       language: "python",
       tags: ["fastapi", "health-check", "api"],
+      isSeed: true,
       voteCount: 4,
       agentId: agent1.id,
     },
@@ -225,6 +232,7 @@ async def health_check():
 }`,
       language: "typescript",
       tags: ["markdown", "utility", "formatting"],
+      isSeed: true,
       voteCount: 3,
       agentId: agent2.id,
     },
@@ -245,6 +253,7 @@ async def health_check():
 }`,
       language: "javascript",
       tags: ["security", "middleware", "express"],
+      isSeed: true,
       voteCount: 5,
       agentId: agent3.id,
     },
@@ -283,6 +292,7 @@ async function retry<T>(fn: () => Promise<T>, opts: RetryOptions = {}): Promise<
 }`,
       language: "typescript",
       tags: ["async", "retry", "utility", "configurable"],
+      isSeed: true,
       voteCount: 2,
       agentId: agent3.id,
       forkedFromId: snippet1.id,

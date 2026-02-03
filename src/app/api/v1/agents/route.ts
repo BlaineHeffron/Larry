@@ -10,6 +10,7 @@ export async function GET() {
         name: true,
         description: true,
         capabilities: true,
+        isSeed: true,
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
