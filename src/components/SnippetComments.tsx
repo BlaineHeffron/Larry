@@ -21,7 +21,33 @@ interface SnippetCommentsProps {
   snippetId: string;
 }
 
-function CommentItem({ comment, depth = 0 }: { comment: Comment; depth?: number }) {
+function CommentItem({
+  comment,
+  depth = 0,
+  hasApiKey,
+  onReply,
+}: {
+  comment: Comment;
+  depth?: number;
+  hasApiKey: boolean;
+  onReply: (parentId: string, content: string) => Promise<void>;
+}) {
+  const [showReply, setShowReply] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replying, setReplying] = useState(false);
+
+  const handleReply = async () => {
+    if (!replyText.trim() || replying) return;
+    setReplying(true);
+    try {
+      await onReply(comment.id, replyText.trim());
+      setReplyText("");
+      setShowReply(false);
+    } finally {
+      setReplying(false);
+    }
+  };
+
   return (
     <div
       className={depth > 0 ? "ml-6 border-l-2 border-[var(--border)] pl-4" : ""}
@@ -48,10 +74,41 @@ function CommentItem({ comment, depth = 0 }: { comment: Comment; depth?: number 
           {comment.content}
         </p>
       </div>
+
+      {hasApiKey && depth < 3 && (
+        <button
+          type="button"
+          onClick={() => setShowReply(!showReply)}
+          className="mt-1 text-xs font-medium text-[var(--primary)] hover:underline"
+        >
+          {showReply ? "Cancel" : "Reply"}
+        </button>
+      )}
+
+      {showReply && (
+        <div className="mt-2">
+          <textarea
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            rows={2}
+            placeholder="Write a reply..."
+            className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+          />
+          <button
+            type="button"
+            onClick={handleReply}
+            disabled={replying || !replyText.trim()}
+            className="mt-1 rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {replying ? "Posting..." : "Post Reply"}
+          </button>
+        </div>
+      )}
+
       {comment.replies && comment.replies.length > 0 && (
         <div className="mt-2 space-y-2">
           {comment.replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} depth={depth + 1} />
+            <CommentItem key={reply.id} comment={reply} depth={depth + 1} hasApiKey={hasApiKey} onReply={onReply} />
           ))}
         </div>
       )}
@@ -63,6 +120,7 @@ export default function SnippetComments({ snippetId }: SnippetCommentsProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasApiKey, setHasApiKey] = useState(false);
 
   // Comment form state
   const [showForm, setShowForm] = useState(false);
@@ -73,48 +131,55 @@ export default function SnippetComments({ snippetId }: SnippetCommentsProps) {
 
   useEffect(() => {
     const saved = localStorage.getItem("larry_api_key");
-    if (saved) setApiKey(saved);
+    if (saved) {
+      setApiKey(saved);
+      setHasApiKey(true);
+    }
   }, []);
 
-  function buildTree(allComments: Comment[]): Comment[] {
-    const topLevel: Comment[] = [];
-    const byParent: Record<string, Comment[]> = {};
-
-    for (const c of allComments) {
-      if (!c.parentId) {
-        topLevel.push({ ...c, replies: [] });
-      } else {
-        if (!byParent[c.parentId]) byParent[c.parentId] = [];
-        byParent[c.parentId].push(c);
-      }
-    }
-
-    function attachReplies(comment: Comment): Comment {
-      const children = byParent[comment.id] ?? [];
-      return {
-        ...comment,
-        replies: children.map(attachReplies),
-      };
-    }
-
-    return topLevel.map(attachReplies);
-  }
-
-  useEffect(() => {
+  const fetchComments = useCallback(() => {
     fetch(`/api/v1/snippets/${snippetId}/comments`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch comments");
         return res.json();
       })
       .then((data) => {
-        const allComments: Comment[] = Array.isArray(data) ? data : data.comments ?? [];
-        setComments(buildTree(allComments));
+        const list: Comment[] = Array.isArray(data) ? data : data.comments ?? [];
+        setComments(list);
       })
       .catch((err) => {
         setError(err.message);
       })
       .finally(() => setLoading(false));
   }, [snippetId]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
+
+  const postComment = useCallback(async (content: string, parentId?: string) => {
+    const key = localStorage.getItem("larry_api_key") || apiKey.trim();
+    if (!key) throw new Error("API key required.");
+
+    const res = await fetch(`/api/v1/snippets/${snippetId}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": key,
+      },
+      body: JSON.stringify({
+        content,
+        ...(parentId ? { parentId } : {}),
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `Request failed (${res.status})`);
+    }
+
+    return res.json();
+  }, [apiKey, snippetId]);
 
   const handlePostComment = useCallback(async () => {
     if (posting || !commentText.trim()) return;
@@ -124,24 +189,11 @@ export default function SnippetComments({ snippetId }: SnippetCommentsProps) {
 
     if (apiKey.trim()) {
       localStorage.setItem("larry_api_key", apiKey.trim());
+      setHasApiKey(true);
     }
 
     try {
-      const res = await fetch(`/api/v1/snippets/${snippetId}/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(apiKey.trim() ? { "x-api-key": apiKey.trim() } : {}),
-        },
-        body: JSON.stringify({ content: commentText.trim() }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || `Request failed (${res.status})`);
-      }
-
-      const newComment = await res.json();
+      const newComment = await postComment(commentText.trim());
       setComments((prev) => [{ ...newComment, replies: [] }, ...prev]);
       setCommentText("");
       setShowForm(false);
@@ -150,7 +202,12 @@ export default function SnippetComments({ snippetId }: SnippetCommentsProps) {
     } finally {
       setPosting(false);
     }
-  }, [posting, commentText, apiKey, snippetId]);
+  }, [posting, commentText, apiKey, postComment]);
+
+  const handleReply = useCallback(async (parentId: string, content: string) => {
+    await postComment(content, parentId);
+    fetchComments();
+  }, [postComment, fetchComments]);
 
   return (
     <section>
@@ -241,7 +298,7 @@ export default function SnippetComments({ snippetId }: SnippetCommentsProps) {
 
       <div className="space-y-3">
         {comments.map((comment) => (
-          <CommentItem key={comment.id} comment={comment} />
+          <CommentItem key={comment.id} comment={comment} hasApiKey={hasApiKey} onReply={handleReply} />
         ))}
       </div>
     </section>
