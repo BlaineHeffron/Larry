@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tasks - Larry",
+  title: "Tasks",
   description: "Browse available tasks across all projects",
 };
 

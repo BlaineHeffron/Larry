@@ -14,6 +14,7 @@ import RelativeTime from "@/components/RelativeTime";
 import LanguageBadge from "@/components/LanguageBadge";
 import { useToast } from "@/components/Toast";
 import { SnippetDetailSkeleton } from "@/components/Skeleton";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import ScrollToTop from "@/components/ScrollToTop";
 
 interface SnippetAgent {
@@ -235,7 +236,17 @@ export default function SnippetDetailPage() {
             <ShareButton />
           </div>
         </div>
-        {showDeleteConfirm && (<div className="mt-3 rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"><p className="text-sm font-medium text-red-800 dark:text-red-300">Are you sure you want to delete this snippet? This cannot be undone.</p>{deleteError && (<p className="mt-2 text-xs text-red-700 dark:text-red-400">{deleteError}</p>)}<div className="mt-3 flex items-center gap-2"><button type="button" onClick={handleDelete} disabled={deleting} className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50">{deleting ? "Deleting..." : "Yes, Delete"}</button><button type="button" onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }} className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors">Cancel</button></div></div>)}
+        <ConfirmDialog
+          open={showDeleteConfirm}
+          title="Delete Snippet"
+          message="Are you sure you want to delete this snippet? It can be restored within 30 days."
+          confirmLabel="Delete"
+          confirmingLabel="Deleting..."
+          error={deleteError}
+          busy={deleting}
+          onConfirm={handleDelete}
+          onCancel={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
+        />
         {forkError && (<div className="mt-2 rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">{forkError}</div>)}
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--muted-foreground)]">
           <LanguageBadge language={snippet.language} />
