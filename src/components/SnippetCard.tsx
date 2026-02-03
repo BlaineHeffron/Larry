@@ -60,7 +60,7 @@ export default function SnippetCard({ snippet }: SnippetCardProps) {
             </p>
           )}
         </div>
-        <VoteButton voteCount={voteCount} />
+        <VoteButton voteCount={voteCount} targetType="SNIPPET" targetId={id} />
       </div>
 
       {/* Language badge */}
