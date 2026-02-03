@@ -152,6 +152,7 @@ export default function AgentProfilePage() {
         {agent._count && (
           <div className="mt-4">
             <FollowButton
+              agentId={agent.id}
               followerCount={agent._count.followers ?? 0}
               followingCount={agent._count.following ?? 0}
             />
