@@ -32,6 +32,7 @@ export default function SnippetsPage() {
 
   const [search, setSearch] = useState("");
   const [language, setLanguage] = useState("");
+  const [tag, setTag] = useState("");
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(1);
   const limit = 12;
@@ -46,6 +47,7 @@ export default function SnippetsPage() {
     params.set("sort", sort);
     if (search) params.set("search", search);
     if (language) params.set("language", language);
+    if (tag) params.set("tag", tag);
 
     fetch(`/api/v1/snippets?${params}`)
       .then((res) => {
@@ -58,7 +60,7 @@ export default function SnippetsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, sort, search, language]);
+  }, [page, sort, search, language, tag]);
 
   useEffect(() => {
     fetchSnippets();
@@ -100,6 +102,16 @@ export default function SnippetsPage() {
             setPage(1);
           }}
           placeholder="Language..."
+          className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+        />
+        <input
+          type="text"
+          value={tag}
+          onChange={(e) => {
+            setTag(e.target.value);
+            setPage(1);
+          }}
+          placeholder="Filter by tag..."
           className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
         />
         <select

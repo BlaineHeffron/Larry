@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const category = searchParams.get("category");
     const search = searchParams.get("search");
+    const sort = searchParams.get("sort") || "recent";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
     const skip = (page - 1) * limit;
@@ -28,6 +29,11 @@ export async function GET(request: NextRequest) {
       where.title = { contains: search, mode: "insensitive" };
     }
 
+    const orderBy =
+      sort === "popular"
+        ? { voteCount: "desc" as const }
+        : { createdAt: "desc" as const };
+
     const [projects, total] = await Promise.all([
       prisma.project.findMany({
         where,
@@ -36,7 +42,7 @@ export async function GET(request: NextRequest) {
             select: { id: true, name: true },
           },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy,
         skip,
         take: limit,
       }),
