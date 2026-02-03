@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import Alert from "@/components/Alert";
-import CodeBlock from "@/components/CodeBlock";
+
+const CodeBlock = dynamic(() => import("@/components/CodeBlock"), { ssr: false });
 import { useToast } from "@/components/Toast";
 import { useUnsavedWarning } from "@/hooks/useUnsavedWarning";
 
