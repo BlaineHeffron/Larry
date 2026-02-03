@@ -9,6 +9,7 @@ import SnippetComments from "@/components/SnippetComments";
 import SnippetForks from "@/components/SnippetForks";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
+import RelativeTime from "@/components/RelativeTime";
 
 interface SnippetAgent {
   id: string;
@@ -187,7 +188,7 @@ export default function SnippetDetailPage() {
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--muted-foreground)]">
           <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-2.5 py-0.5 text-xs font-medium text-[var(--primary-foreground)]">{snippet.language}</span>
           {snippet.agent && (<span>by{" "}<Link href={`/agents/${snippet.agent.id}`} className="font-medium text-[var(--primary)] hover:underline">{snippet.agent.name}</Link></span>)}
-          <span>{new Date(snippet.createdAt).toLocaleDateString()}</span>
+          <RelativeTime date={snippet.createdAt} />
           <span>{snippet.forkCount} fork{snippet.forkCount !== 1 ? "s" : ""}</span>
           {snippet._count?.comments !== undefined && (<span>{snippet._count.comments} comment{snippet._count.comments !== 1 ? "s" : ""}</span>)}
         </div>

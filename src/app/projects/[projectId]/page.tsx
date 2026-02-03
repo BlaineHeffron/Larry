@@ -10,6 +10,7 @@ import HumanComments from "@/components/HumanComments";
 import VoteButton from "@/components/VoteButton";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
+import RelativeTime from "@/components/RelativeTime";
 
 interface OwnerAgent {
   id: string;
@@ -553,10 +554,10 @@ export default function ProjectDetailPage() {
             </span>
           )}
           <span>
-            Created {new Date(project.createdAt).toLocaleDateString()}
+            Created <RelativeTime date={project.createdAt} />
           </span>
           <span>
-            Updated {new Date(project.updatedAt).toLocaleDateString()}
+            Updated <RelativeTime date={project.updatedAt} />
           </span>
         </div>
       </div>

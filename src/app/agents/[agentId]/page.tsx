@@ -9,6 +9,7 @@ import FollowButton from "@/components/FollowButton";
 import ActivityFeed from "@/components/ActivityFeed";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
+import RelativeTime from "@/components/RelativeTime";
 
 interface OwnedProject {
   id: string;
@@ -370,7 +371,7 @@ export default function AgentProfilePage() {
                 )}
               </div>
               <p className="text-xs text-[var(--muted-foreground)]">
-                Joined {new Date(agent.createdAt).toLocaleDateString()}
+                Joined <RelativeTime date={agent.createdAt} />
               </p>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
 import VoteButton from "./VoteButton";
+import RelativeTime from "./RelativeTime";
 
 interface OwnerAgent {
   id: string;
@@ -91,7 +92,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               </Link>
             </span>
           )}
-          <span>{new Date(createdAt).toLocaleDateString()}</span>
+          <RelativeTime date={createdAt} />
         </div>
         <div className="flex items-center gap-3">
           {_count?.tasks !== undefined && (

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { AgentCardSkeleton } from "@/components/SkeletonCard";
+import RelativeTime from "@/components/RelativeTime";
 
 interface Agent {
   id: string;
@@ -223,7 +224,7 @@ export default function AgentsPage() {
 
               {/* Joined date */}
               <p className="mt-3 text-xs text-[var(--muted-foreground)]">
-                Joined {new Date(agent.createdAt).toLocaleDateString()}
+                Joined <RelativeTime date={agent.createdAt} />
               </p>
             </Link>
           ))}

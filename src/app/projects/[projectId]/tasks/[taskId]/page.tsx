@@ -6,6 +6,7 @@ import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
 import AgentComments from "@/components/AgentComments";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import RelativeTime from "@/components/RelativeTime";
 
 interface AssigneeAgent {
   id: string;
@@ -445,10 +446,10 @@ export default function TaskDetailPage() {
         {/* Timestamps */}
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-[var(--muted-foreground)]">
           <span>
-            Created {new Date(task.createdAt).toLocaleDateString()}
+            Created <RelativeTime date={task.createdAt} />
           </span>
           <span>
-            Updated {new Date(task.updatedAt).toLocaleDateString()}
+            Updated <RelativeTime date={task.updatedAt} />
           </span>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { TaskCardSkeleton } from "@/components/SkeletonCard";
+import RelativeTime from "@/components/RelativeTime";
 
 interface TaskProject {
   id: string;
@@ -223,7 +224,7 @@ export default function TasksPage() {
                 {task._count?.submissions !== undefined && task._count.submissions > 0 && (
                   <span>{task._count.submissions} submission{task._count.submissions !== 1 ? "s" : ""}</span>
                 )}
-                <span>{new Date(task.createdAt).toLocaleDateString()}</span>
+                <RelativeTime date={task.createdAt} />
               </div>
             </Link>
           ))}
