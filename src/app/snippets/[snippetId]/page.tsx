@@ -33,6 +33,7 @@ interface SnippetDetail {
     agent?: SnippetAgent;
   } | null;
   _count?: { comments?: number; forks?: number };
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -66,6 +67,9 @@ export default function SnippetDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Restore state
+  const [restoring, setRestoring] = useState(false);
 
   useEffect(() => {
     setHasApiKey(!!localStorage.getItem("larry_api_key"));
@@ -112,8 +116,10 @@ export default function SnippetDetailPage() {
     try {
       const res = await fetch(`/api/v1/snippets/${snippetId}`, { method: "DELETE", headers: { "x-api-key": apiKey } });
       if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || `Request failed (${res.status})`); }
-      toast("Snippet deleted");
-      router.push("/snippets");
+      const data = await res.json();
+      setSnippet((prev) => (prev ? { ...prev, deletedAt: data.deletedAt } : prev));
+      setShowDeleteConfirm(false);
+      toast("Snippet deleted — you can restore it within 30 days");
     } catch (err) { setDeleteError(err instanceof Error ? err.message : String(err)); } finally { setDeleting(false); }
   }, [deleting, snippetId, router, toast]);
 
@@ -131,6 +137,20 @@ export default function SnippetDetailPage() {
       router.push(`/snippets/${fork.id}`);
     } catch (err) { setForkError(err instanceof Error ? err.message : String(err)); } finally { setForking(false); }
   }, [forking, snippetId, router, toast]);
+
+  const handleRestore = useCallback(async () => {
+    if (restoring) return;
+    setRestoring(true);
+    const apiKey = localStorage.getItem("larry_api_key") || "";
+    if (!apiKey) { toast("API key required", "error"); setRestoring(false); return; }
+    try {
+      const res = await fetch(`/api/v1/snippets/${snippetId}/restore`, { method: "POST", headers: { "x-api-key": apiKey } });
+      if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || `Request failed (${res.status})`); }
+      const restored = await res.json();
+      setSnippet((prev) => (prev ? { ...prev, ...restored, deletedAt: null } : prev));
+      toast("Snippet restored");
+    } catch (err) { toast(err instanceof Error ? err.message : "Restore failed", "error"); } finally { setRestoring(false); }
+  }, [restoring, snippetId, toast]);
 
   useEffect(() => {
     if (!snippetId) return;
@@ -175,6 +195,24 @@ export default function SnippetDetailPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <nav className="mb-6 text-sm text-[var(--muted-foreground)]"><Link href="/snippets" className="hover:text-[var(--primary)]">Snippets</Link><span className="mx-2">/</span><span className="text-[var(--foreground)]">{snippet.title}</span></nav>
+      {snippet.deletedAt && (
+        <div className="mb-4 flex items-center justify-between rounded-md border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
+          <div>
+            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">This snippet was deleted on {new Date(snippet.deletedAt).toLocaleDateString()}.</p>
+            <p className="mt-0.5 text-xs text-yellow-700 dark:text-yellow-400">It can be restored within 30 days of deletion.</p>
+          </div>
+          {hasApiKey && (
+            <button
+              type="button"
+              onClick={handleRestore}
+              disabled={restoring}
+              className="shrink-0 rounded-md bg-yellow-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-yellow-700 transition-colors disabled:opacity-50"
+            >
+              {restoring ? "Restoring..." : "Restore"}
+            </button>
+          )}
+        </div>
+      )}
       <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
         <div className="flex items-start justify-between gap-4">
           <div>

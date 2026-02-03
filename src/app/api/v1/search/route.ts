@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     };
 
     const snippetWhere = {
+      deletedAt: null,
       OR: [
         { title: { contains: q, mode: "insensitive" as const } },
         { description: { contains: q, mode: "insensitive" as const } },
