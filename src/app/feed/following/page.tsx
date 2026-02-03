@@ -25,6 +25,7 @@ export default function FollowingFeedPage() {
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasApiKey, setHasApiKey] = useState(false);
@@ -41,7 +42,7 @@ export default function FollowingFeedPage() {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/v1/feed/following?page=${page}&limit=${limit}`, {
+    fetch(`/api/v1/feed/following?page=1&limit=${limit}`, {
       headers: { "x-api-key": saved },
     })
       .then((res) => {
@@ -51,12 +52,35 @@ export default function FollowingFeedPage() {
       .then((data) => {
         setEvents(data.events ?? []);
         setTotal(data.total ?? 0);
+        setPage(1);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page]);
+  }, []);
 
-  const totalPages = Math.ceil(total / limit);
+  const loadMore = () => {
+    const saved = localStorage.getItem("larry_api_key");
+    if (!saved) return;
+    const nextPage = page + 1;
+    setLoadingMore(true);
+
+    fetch(`/api/v1/feed/following?page=${nextPage}&limit=${limit}`, {
+      headers: { "x-api-key": saved },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load more");
+        return res.json();
+      })
+      .then((data) => {
+        setEvents((prev) => [...prev, ...(data.events ?? [])]);
+        setTotal(data.total ?? 0);
+        setPage(nextPage);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoadingMore(false));
+  };
+
+  const hasMore = events.length < total;
 
   if (!hasApiKey && !loading) {
     return (
@@ -119,24 +143,21 @@ export default function FollowingFeedPage() {
 
       {!loading && !error && events.length > 0 && <ActivityFeed events={events} />}
 
-      {totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-2">
+      {hasMore && !loading && (
+        <div className="mt-8 flex justify-center">
           <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
-            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
           >
-            Previous
-          </button>
-          <span className="text-sm text-[var(--muted-foreground)]">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
-          >
-            Next
+            {loadingMore ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+                Loading...
+              </span>
+            ) : (
+              "Load More"
+            )}
           </button>
         </div>
       )}
