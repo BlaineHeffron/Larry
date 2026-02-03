@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
@@ -58,6 +58,84 @@ export default function AgentProfilePage() {
   const [agent, setAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  // Edit state
+  const [editing, setEditing] = useState(false);
+  const [editDescription, setEditDescription] = useState("");
+  const [editCapabilities, setEditCapabilities] = useState("");
+  const [editHomepage, setEditHomepage] = useState("");
+  const [editSourceUrl, setEditSourceUrl] = useState("");
+  const [editMcpEndpoint, setEditMcpEndpoint] = useState("");
+  const [editAvatarUrl, setEditAvatarUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("larry_api_key");
+    if (saved) setHasApiKey(true);
+  }, []);
+
+  const startEditing = useCallback(() => {
+    if (!agent) return;
+    setEditDescription(agent.description || "");
+    setEditCapabilities(agent.capabilities?.join(", ") || "");
+    setEditHomepage(agent.homepage || "");
+    setEditSourceUrl(agent.sourceUrl || "");
+    setEditMcpEndpoint(agent.mcpEndpoint || "");
+    setEditAvatarUrl(agent.avatarUrl || "");
+    setSaveError(null);
+    setEditing(true);
+  }, [agent]);
+
+  const handleSave = useCallback(async () => {
+    if (saving) return;
+
+    setSaving(true);
+    setSaveError(null);
+
+    const apiKey = localStorage.getItem("larry_api_key") || "";
+    if (!apiKey) {
+      setSaveError("API key required.");
+      setSaving(false);
+      return;
+    }
+
+    try {
+      const capabilities = editCapabilities.trim()
+        ? editCapabilities.split(",").map((c) => c.trim()).filter(Boolean)
+        : [];
+
+      const res = await fetch(`/api/v1/agents/${agentId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          description: editDescription.trim(),
+          capabilities,
+          homepage: editHomepage.trim() || null,
+          sourceUrl: editSourceUrl.trim() || null,
+          mcpEndpoint: editMcpEndpoint.trim() || null,
+          avatarUrl: editAvatarUrl.trim() || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const updated = await res.json();
+      setAgent((prev) => (prev ? { ...prev, ...updated } : prev));
+      setEditing(false);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
+    }
+  }, [saving, editDescription, editCapabilities, editHomepage, editSourceUrl, editMcpEndpoint, editAvatarUrl, agentId]);
 
   useEffect(() => {
     if (!agentId) return;
@@ -108,6 +186,141 @@ export default function AgentProfilePage() {
     );
   }
 
+  if (editing) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <nav className="mb-6 text-sm text-[var(--muted-foreground)]">
+          <Link href="/agents" className="hover:text-[var(--primary)]">
+            Agents
+          </Link>
+          <span className="mx-2">/</span>
+          <Link href={`/agents/${agent.id}`} className="hover:text-[var(--primary)]">
+            {agent.name}
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-[var(--foreground)]">Edit Profile</span>
+        </nav>
+
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
+          <h2 className="text-xl font-bold text-[var(--card-foreground)]">Edit Profile</h2>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label htmlFor="edit-agent-description" className="block text-sm font-medium text-[var(--card-foreground)]">
+                Description
+              </label>
+              <textarea
+                id="edit-agent-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={4}
+                placeholder="Describe what your agent does..."
+                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="edit-agent-capabilities" className="block text-sm font-medium text-[var(--card-foreground)]">
+                Capabilities <span className="text-xs font-normal text-[var(--muted-foreground)]">(comma-separated)</span>
+              </label>
+              <input
+                id="edit-agent-capabilities"
+                type="text"
+                value={editCapabilities}
+                onChange={(e) => setEditCapabilities(e.target.value)}
+                placeholder="code-review, testing, refactoring"
+                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="edit-agent-homepage" className="block text-sm font-medium text-[var(--card-foreground)]">
+                  Homepage URL
+                </label>
+                <input
+                  id="edit-agent-homepage"
+                  type="url"
+                  value={editHomepage}
+                  onChange={(e) => setEditHomepage(e.target.value)}
+                  placeholder="https://example.com"
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-agent-source" className="block text-sm font-medium text-[var(--card-foreground)]">
+                  Source Code URL
+                </label>
+                <input
+                  id="edit-agent-source"
+                  type="url"
+                  value={editSourceUrl}
+                  onChange={(e) => setEditSourceUrl(e.target.value)}
+                  placeholder="https://github.com/owner/repo"
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="edit-agent-mcp" className="block text-sm font-medium text-[var(--card-foreground)]">
+                  MCP Endpoint URL
+                </label>
+                <input
+                  id="edit-agent-mcp"
+                  type="url"
+                  value={editMcpEndpoint}
+                  onChange={(e) => setEditMcpEndpoint(e.target.value)}
+                  placeholder="https://example.com/mcp"
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-agent-avatar" className="block text-sm font-medium text-[var(--card-foreground)]">
+                  Avatar URL
+                </label>
+                <input
+                  id="edit-agent-avatar"
+                  type="url"
+                  value={editAvatarUrl}
+                  onChange={(e) => setEditAvatarUrl(e.target.value)}
+                  placeholder="https://example.com/avatar.png"
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                />
+              </div>
+            </div>
+
+            {saveError && (
+              <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {saveError}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEditing(false); setSaveError(null); }}
+                className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Breadcrumb */}
@@ -121,31 +334,43 @@ export default function AgentProfilePage() {
 
       {/* Agent Profile Card */}
       <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
-        <div className="flex items-center gap-4">
-          {agent.avatarUrl ? (
-            <img
-              src={agent.avatarUrl}
-              alt={agent.name}
-              className="h-14 w-14 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary)] text-xl font-bold text-[var(--primary-foreground)]">
-              {agent.name.charAt(0).toUpperCase()}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {agent.avatarUrl ? (
+              <img
+                src={agent.avatarUrl}
+                alt={agent.name}
+                className="h-14 w-14 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary)] text-xl font-bold text-[var(--primary-foreground)]">
+                {agent.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-[var(--card-foreground)]">
+                  {agent.name}
+                </h1>
+                {agent.reputation !== undefined && (
+                  <ReputationBadge reputation={agent.reputation} />
+                )}
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                Joined {new Date(agent.createdAt).toLocaleDateString()}
+              </p>
             </div>
-          )}
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-[var(--card-foreground)]">
-                {agent.name}
-              </h1>
-              {agent.reputation !== undefined && (
-                <ReputationBadge reputation={agent.reputation} />
-              )}
-            </div>
-            <p className="text-xs text-[var(--muted-foreground)]">
-              Joined {new Date(agent.createdAt).toLocaleDateString()}
-            </p>
           </div>
+
+          {hasApiKey && (
+            <button
+              type="button"
+              onClick={startEditing}
+              className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+            >
+              Edit
+            </button>
+          )}
         </div>
 
         {/* Social stats */}
