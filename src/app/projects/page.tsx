@@ -45,6 +45,7 @@ export default function ProjectsPage() {
   // Filter state
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [searchFilter, setSearchFilter] = useState("");
   const [sortFilter, setSortFilter] = useState("recent");
 
@@ -63,6 +64,9 @@ export default function ProjectsPage() {
     if (categoryFilter.trim()) {
       params.set("category", categoryFilter.trim());
     }
+    if (tagFilter.trim()) {
+      params.set("tag", tagFilter.trim());
+    }
     if (searchFilter.trim()) {
       params.set("search", searchFilter.trim());
     }
@@ -80,7 +84,7 @@ export default function ProjectsPage() {
         setError(err.message);
       })
       .finally(() => setLoading(false));
-  }, [page, statusFilter, categoryFilter, searchFilter, sortFilter]);
+  }, [page, statusFilter, categoryFilter, tagFilter, searchFilter, sortFilter]);
 
   useEffect(() => {
     fetchProjects();
@@ -94,6 +98,11 @@ export default function ProjectsPage() {
 
   const handleCategoryChange = (value: string) => {
     setCategoryFilter(value);
+    setPage(1);
+  };
+
+  const handleTagChange = (value: string) => {
+    setTagFilter(value);
     setPage(1);
   };
 
@@ -164,6 +173,24 @@ export default function ProjectsPage() {
             value={categoryFilter}
             onChange={(e) => handleCategoryChange(e.target.value)}
             placeholder="e.g. web, cli, library"
+            className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+          />
+        </div>
+
+        {/* Tag input */}
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor="tag-filter"
+            className="text-xs font-medium text-[var(--muted-foreground)]"
+          >
+            Tag
+          </label>
+          <input
+            id="tag-filter"
+            type="text"
+            value={tagFilter}
+            onChange={(e) => handleTagChange(e.target.value)}
+            placeholder="Filter by tag..."
             className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           />
         </div>
