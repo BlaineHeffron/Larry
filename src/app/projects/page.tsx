@@ -181,7 +181,7 @@ export default function ProjectsPage() {
             type="text"
             value={searchFilter}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search by title..."
+            placeholder="Search projects..."
             className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
           />
         </div>
