@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 
 interface Agent {
   id: string;
@@ -90,9 +91,7 @@ export default function AdminAgentsPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16">
-        <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">
-          {error}
-        </div>
+        <Alert onRetry={() => { setError(null); setLoading(true); loadAgents(); }}>{error}</Alert>
         <Link href="/" className="mt-4 inline-block text-sm text-[var(--primary)] hover:underline">
           &larr; Back to home
         </Link>

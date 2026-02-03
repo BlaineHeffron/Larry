@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Alert from "@/components/Alert";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,9 +46,7 @@ export default function LoginPage() {
       </p>
 
       {error && (
-        <div className="mt-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </div>
+        <Alert className="mt-4">{error}</Alert>
       )}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">

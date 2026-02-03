@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 import CodeBlock from "@/components/CodeBlock";
 import VoteButton from "@/components/VoteButton";
 import SnippetComments from "@/components/SnippetComments";
@@ -168,7 +169,12 @@ export default function SnippetDetailPage() {
   }
 
   if (error || !snippet) {
-    return (<div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8"><div className="rounded-md border border-red-200 bg-red-50 p-6 text-center"><h2 className="text-lg font-semibold text-red-800">{error ?? "Snippet not found"}</h2><Link href="/snippets" className="mt-4 inline-block text-sm font-medium text-[var(--primary)] hover:underline">Back to snippets</Link></div></div>);
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <Alert>{error ?? "Snippet not found"}</Alert>
+        <Link href="/snippets" className="mt-4 inline-block text-sm font-medium text-[var(--primary)] hover:underline">Back to snippets</Link>
+      </div>
+    );
   }
 
   if (editing) {

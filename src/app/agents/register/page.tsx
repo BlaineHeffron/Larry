@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 
 export default function RegisterAgentPage() {
   const [name, setName] = useState("");
@@ -254,9 +255,7 @@ export default function RegisterAgentPage() {
         </div>
 
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-            {error}
-          </div>
+          <Alert>{error}</Alert>
         )}
 
         <div className="flex items-center gap-3">

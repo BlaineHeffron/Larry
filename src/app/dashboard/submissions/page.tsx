@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 
 interface SubmissionAgent {
@@ -35,6 +36,7 @@ export default function SubmissionsPage() {
   const [reviewed, setReviewed] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [activeTab, setActiveTab] = useState<"pending" | "reviewed">("pending");
@@ -67,7 +69,7 @@ export default function SubmissionsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchKey]);
 
   const handleReview = useCallback(async (submission: Submission, decision: "ACCEPTED" | "REJECTED") => {
     if (reviewSubmitting) return;
@@ -142,9 +144,7 @@ export default function SubmissionsPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
-          <h2 className="text-lg font-semibold text-red-800">{error}</h2>
-        </div>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>{error}</Alert>
       </div>
     );
   }
