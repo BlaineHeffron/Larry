@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
@@ -58,6 +58,81 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("tasks");
+
+  // Create task form state
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskApiKey, setTaskApiKey] = useState("");
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskPriority, setTaskPriority] = useState("MEDIUM");
+  const [taskAcceptance, setTaskAcceptance] = useState("");
+  const [taskTesting, setTaskTesting] = useState("");
+  const [taskGithubUrl, setTaskGithubUrl] = useState("");
+  const [taskSubmitting, setTaskSubmitting] = useState(false);
+  const [taskError, setTaskError] = useState<string | null>(null);
+  const [taskSuccess, setTaskSuccess] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("larry_api_key");
+    if (saved) setTaskApiKey(saved);
+  }, []);
+
+  const handleCreateTask = useCallback(async () => {
+    if (taskSubmitting || !taskTitle.trim() || !taskDescription.trim()) return;
+
+    setTaskSubmitting(true);
+    setTaskError(null);
+    setTaskSuccess(false);
+
+    if (taskApiKey.trim()) {
+      localStorage.setItem("larry_api_key", taskApiKey.trim());
+    }
+
+    try {
+      const res = await fetch(`/api/v1/projects/${projectId}/tasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(taskApiKey.trim() ? { "x-api-key": taskApiKey.trim() } : {}),
+        },
+        body: JSON.stringify({
+          title: taskTitle.trim(),
+          description: taskDescription.trim(),
+          priority: taskPriority,
+          ...(taskAcceptance.trim() ? { acceptanceCriteria: taskAcceptance.trim() } : {}),
+          ...(taskTesting.trim() ? { testingNotes: taskTesting.trim() } : {}),
+          ...(taskGithubUrl.trim() ? { githubIssueUrl: taskGithubUrl.trim() } : {}),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const newTask = await res.json();
+      setProject((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          tasks: [...(prev.tasks ?? []), newTask],
+        };
+      });
+
+      setTaskTitle("");
+      setTaskDescription("");
+      setTaskPriority("MEDIUM");
+      setTaskAcceptance("");
+      setTaskTesting("");
+      setTaskGithubUrl("");
+      setTaskSuccess(true);
+      setShowTaskForm(false);
+    } catch (err) {
+      setTaskError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setTaskSubmitting(false);
+    }
+  }, [taskSubmitting, taskTitle, taskDescription, taskPriority, taskAcceptance, taskTesting, taskGithubUrl, taskApiKey, projectId]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -252,6 +327,161 @@ export default function ProjectDetailPage() {
                 ))}
               </div>
             )}
+
+            {/* Create Task Form */}
+            <div className="mt-6">
+              {taskSuccess && (
+                <div className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
+                  Task created successfully.
+                </div>
+              )}
+
+              {!showTaskForm ? (
+                <button
+                  type="button"
+                  onClick={() => { setShowTaskForm(true); setTaskSuccess(false); }}
+                  className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+                >
+                  Add Task
+                </button>
+              ) : (
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
+                  <h3 className="text-lg font-semibold text-[var(--card-foreground)]">
+                    Add Task
+                  </h3>
+                  <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                    Create a new task for this project. Only the project owner can add tasks.
+                  </p>
+
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <label htmlFor="task-api-key" className="block text-sm font-medium text-[var(--card-foreground)]">
+                        API Key
+                      </label>
+                      <input
+                        id="task-api-key"
+                        type="password"
+                        value={taskApiKey}
+                        onChange={(e) => setTaskApiKey(e.target.value)}
+                        placeholder="lry_..."
+                        className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="task-title" className="block text-sm font-medium text-[var(--card-foreground)]">
+                        Title <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="task-title"
+                        type="text"
+                        value={taskTitle}
+                        onChange={(e) => setTaskTitle(e.target.value)}
+                        placeholder="Implement feature X"
+                        className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="task-description" className="block text-sm font-medium text-[var(--card-foreground)]">
+                        Description <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="task-description"
+                        value={taskDescription}
+                        onChange={(e) => setTaskDescription(e.target.value)}
+                        rows={4}
+                        placeholder="Describe what needs to be done..."
+                        className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="task-priority" className="block text-sm font-medium text-[var(--card-foreground)]">
+                        Priority
+                      </label>
+                      <select
+                        id="task-priority"
+                        value={taskPriority}
+                        onChange={(e) => setTaskPriority(e.target.value)}
+                        className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                      >
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                        <option value="CRITICAL">Critical</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="task-acceptance" className="block text-sm font-medium text-[var(--card-foreground)]">
+                        Acceptance Criteria <span className="text-xs font-normal text-[var(--muted-foreground)]">(optional)</span>
+                      </label>
+                      <textarea
+                        id="task-acceptance"
+                        value={taskAcceptance}
+                        onChange={(e) => setTaskAcceptance(e.target.value)}
+                        rows={2}
+                        placeholder="What defines done?"
+                        className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="task-testing" className="block text-sm font-medium text-[var(--card-foreground)]">
+                        Testing Notes <span className="text-xs font-normal text-[var(--muted-foreground)]">(optional)</span>
+                      </label>
+                      <textarea
+                        id="task-testing"
+                        value={taskTesting}
+                        onChange={(e) => setTaskTesting(e.target.value)}
+                        rows={2}
+                        placeholder="How to test this?"
+                        className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="task-github-url" className="block text-sm font-medium text-[var(--card-foreground)]">
+                        GitHub Issue URL <span className="text-xs font-normal text-[var(--muted-foreground)]">(optional)</span>
+                      </label>
+                      <input
+                        id="task-github-url"
+                        type="url"
+                        value={taskGithubUrl}
+                        onChange={(e) => setTaskGithubUrl(e.target.value)}
+                        placeholder="https://github.com/owner/repo/issues/123"
+                        className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                      />
+                    </div>
+
+                    {taskError && (
+                      <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                        {taskError}
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleCreateTask}
+                        disabled={taskSubmitting || !taskTitle.trim() || !taskDescription.trim()}
+                        className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+                      >
+                        {taskSubmitting ? "Creating..." : "Create Task"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setShowTaskForm(false); setTaskError(null); }}
+                        className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
