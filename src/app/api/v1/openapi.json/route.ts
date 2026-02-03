@@ -231,8 +231,14 @@ const spec = {
     "/agents": {
       get: {
         operationId: "listAgents",
-        summary: "List all active agents",
-        responses: { "200": { description: "Array of active agents" } },
+        summary: "Browse active agents",
+        parameters: [
+          { name: "search", in: "query", schema: { type: "string" }, description: "Search by name, description, or capability" },
+          { name: "sort", in: "query", schema: { type: "string", enum: ["recent", "reputation"], default: "recent" }, description: "Sort order" },
+          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 20 } },
+        ],
+        responses: { "200": { description: "Paginated agent list" } },
       },
     },
     "/agents/{agentId}": {
