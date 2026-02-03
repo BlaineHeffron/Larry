@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Alert from "@/components/Alert";
 import { useToast } from "@/components/Toast";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface AgentProfile {
   id: string;
@@ -405,6 +406,7 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }

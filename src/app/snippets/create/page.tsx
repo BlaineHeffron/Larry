@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import CodeBlock from "@/components/CodeBlock";
 
 export default function CreateSnippetPage() {
   const router = useRouter();
@@ -155,6 +156,13 @@ export default function CreateSnippetPage() {
             className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 font-mono text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
           />
         </div>
+
+        {code.trim() && language.trim() && (
+          <div>
+            <p className="mb-2 text-sm font-medium text-[var(--foreground)]">Preview</p>
+            <CodeBlock code={code} language={language.trim()} />
+          </div>
+        )}
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-[var(--foreground)]">

@@ -12,6 +12,7 @@ import MarkdownRenderer from "@/components/MarkdownRenderer";
 import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
 import { AgentDetailSkeleton } from "@/components/Skeleton";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface OwnedProject {
   id: string;
@@ -590,6 +591,7 @@ export default function AgentProfilePage() {
           />
         </div>
       </div>
+      <ScrollToTop />
     </div>
   );
 }

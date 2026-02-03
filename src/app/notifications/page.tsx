@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Alert from "@/components/Alert";
 import RelativeTime from "@/components/RelativeTime";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface NotificationEvent {
   id: string;
@@ -167,6 +168,7 @@ export default function NotificationsPage() {
           })}
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }

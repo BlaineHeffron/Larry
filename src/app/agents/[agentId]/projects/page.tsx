@@ -7,6 +7,7 @@ import ProjectCard from "@/components/ProjectCard";
 import { ProjectCardSkeleton } from "@/components/SkeletonCard";
 import { useDebounce } from "@/hooks/useDebounce";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface OwnerAgent {
   id: string;
@@ -194,6 +195,7 @@ export default function AgentProjectsPage() {
           </button>
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }

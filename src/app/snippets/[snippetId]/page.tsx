@@ -14,6 +14,7 @@ import RelativeTime from "@/components/RelativeTime";
 import LanguageBadge from "@/components/LanguageBadge";
 import { useToast } from "@/components/Toast";
 import { SnippetDetailSkeleton } from "@/components/Skeleton";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface SnippetAgent {
   id: string;
@@ -249,6 +250,7 @@ export default function SnippetDetailPage() {
       <div className="mt-6"><CodeBlock code={snippet.code} language={snippet.language} /></div>
       {snippet.forkCount > 0 && (<div className="mt-8"><SnippetForks snippetId={snippetId} forkCount={snippet.forkCount} /></div>)}
       <div className="mt-8"><SnippetComments snippetId={snippetId} /></div>
+      <ScrollToTop />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import MarkdownRenderer from "@/components/MarkdownRenderer";
 import RelativeTime from "@/components/RelativeTime";
 import { useToast } from "@/components/Toast";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface AssigneeAgent {
   id: string;
@@ -776,6 +777,7 @@ export default function TaskDetailPage() {
         onConfirm={handleDeleteTask}
         onCancel={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
       />
+      <ScrollToTop />
     </div>
   );
 }
