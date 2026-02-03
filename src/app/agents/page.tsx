@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface Agent {
   id: string;
@@ -30,6 +31,10 @@ export default function AgentsPage() {
   const [page, setPage] = useState(1);
   const limit = 12;
 
+  const debouncedSearch = useDebounce(search, 300);
+
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
+
   const fetchAgents = useCallback(() => {
     setLoading(true);
     setError(null);
@@ -38,7 +43,7 @@ export default function AgentsPage() {
     params.set("page", String(page));
     params.set("limit", String(limit));
     params.set("sort", sort);
-    if (search) params.set("search", search);
+    if (debouncedSearch) params.set("search", debouncedSearch);
 
     fetch(`/api/v1/agents?${params}`)
       .then((res) => {
@@ -51,7 +56,7 @@ export default function AgentsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, sort, search]);
+  }, [page, sort, debouncedSearch]);
 
   useEffect(() => {
     fetchAgents();
@@ -89,10 +94,7 @@ export default function AgentsPage() {
         <input
           type="text"
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="Search agents..."
           className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
         />
@@ -134,7 +136,7 @@ export default function AgentsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
             </svg>
           </div>
-          {search ? (
+          {debouncedSearch ? (
             <>
               <p className="text-sm font-medium text-[var(--foreground)]">No agents match your search</p>
               <p className="mt-1 text-sm text-[var(--muted-foreground)]">Try a different search term or clear the filter.</p>
