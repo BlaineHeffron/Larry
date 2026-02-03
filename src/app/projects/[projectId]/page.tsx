@@ -60,6 +60,11 @@ export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>("tasks");
   const [hasApiKey, setHasApiKey] = useState(false);
 
+  // Task filter state
+  const [taskStatusFilter, setTaskStatusFilter] = useState("All");
+  const [taskPriorityFilter, setTaskPriorityFilter] = useState("All");
+  const [taskSortBy, setTaskSortBy] = useState("newest");
+
   // Edit project state
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
@@ -575,15 +580,73 @@ export default function ProjectDetailPage() {
       {/* Tab Content */}
       <div className="mt-6">
         {/* Tasks Tab */}
-        {activeTab === "tasks" && (
+        {activeTab === "tasks" && (() => {
+          const priorityOrder: Record<string, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+          const allTasks = project.tasks ?? [];
+          const filtered = allTasks
+            .filter((t) => taskStatusFilter === "All" || t.status === taskStatusFilter)
+            .filter((t) => taskPriorityFilter === "All" || t.priority === taskPriorityFilter)
+            .sort((a, b) => {
+              if (taskSortBy === "priority") return (priorityOrder[b.priority] ?? 0) - (priorityOrder[a.priority] ?? 0);
+              return 0; // default order from API is newest first
+            });
+
+          return (
           <div>
-            {(!project.tasks || project.tasks.length === 0) ? (
+            {/* Filter Controls */}
+            {allTasks.length > 0 && (
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <select
+                  value={taskStatusFilter}
+                  onChange={(e) => setTaskStatusFilter(e.target.value)}
+                  className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-sm text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="POSTED">Posted</option>
+                  <option value="CLAIMED">Claimed</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="IN_REVIEW">In Review</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+                <select
+                  value={taskPriorityFilter}
+                  onChange={(e) => setTaskPriorityFilter(e.target.value)}
+                  className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-sm text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                >
+                  <option value="All">All Priorities</option>
+                  <option value="CRITICAL">Critical</option>
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="LOW">Low</option>
+                </select>
+                <select
+                  value={taskSortBy}
+                  onChange={(e) => setTaskSortBy(e.target.value)}
+                  className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-sm text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="priority">Priority</option>
+                </select>
+                {(taskStatusFilter !== "All" || taskPriorityFilter !== "All") && (
+                  <span className="text-xs text-[var(--muted-foreground)]">
+                    {filtered.length} of {allTasks.length} tasks
+                  </span>
+                )}
+              </div>
+            )}
+
+            {allTasks.length === 0 ? (
               <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">
                 No tasks have been created for this project yet.
               </p>
+            ) : filtered.length === 0 ? (
+              <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">
+                No tasks match the current filters.
+              </p>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {project.tasks.map((task) => (
+                {filtered.map((task) => (
                   <TaskCard key={task.id} task={task} />
                 ))}
               </div>
@@ -744,7 +807,8 @@ export default function ProjectDetailPage() {
               )}
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* Agent Discussion Tab */}
         {activeTab === "agent" && (
