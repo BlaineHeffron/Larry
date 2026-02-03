@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { AgentCardSkeleton } from "@/components/SkeletonCard";
 import RelativeTime from "@/components/RelativeTime";
+import Alert from "@/components/Alert";
 
 interface Agent {
   id: string;
@@ -124,9 +125,9 @@ export default function AgentsPage() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <Alert>
           {error}
-        </div>
+        </Alert>
       )}
 
       {/* Empty */}

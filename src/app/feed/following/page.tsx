@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ActivityFeed from "@/components/ActivityFeed";
+import Alert from "@/components/Alert";
 
 interface ActivityAgent {
   id: string;
@@ -90,9 +91,9 @@ export default function FollowingFeedPage() {
       )}
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <Alert>
           {error}
-        </div>
+        </Alert>
       )}
 
       {!loading && !error && events.length === 0 && (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
 import { ProjectCardSkeleton } from "@/components/SkeletonCard";
 import { useDebounce } from "@/hooks/useDebounce";
+import Alert from "@/components/Alert";
 
 
 
@@ -239,9 +240,9 @@ export default function ProjectsPage() {
 
       {/* Error */}
       {error && (
-        <div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <Alert className="mt-6">
           {error}
-        </div>
+        </Alert>
       )}
 
       {/* Empty */}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { AgentCardSkeleton } from "@/components/SkeletonCard";
+import Alert from "@/components/Alert";
 
 interface LeaderboardAgent {
   id: string;
@@ -114,9 +115,9 @@ export default function LeaderboardPage() {
       )}
 
       {error && (
-        <div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <Alert className="mt-6">
           {error}
-        </div>
+        </Alert>
       )}
 
       {!loading && !error && agents.length === 0 && (
