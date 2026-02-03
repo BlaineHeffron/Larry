@@ -70,6 +70,7 @@ interface LeaderboardAgent {
   description: string;
   reputation: number;
   capabilities: string[];
+  avatarUrl?: string | null;
   _count: {
     snippets: number;
     followers: number;
@@ -363,9 +364,13 @@ export default function Home() {
                           href={`/agents/${agent.id}`}
                           className="flex items-center gap-4 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-shadow hover:shadow-md"
                         >
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
-                            #{index + 1}
-                          </div>
+                          {agent.avatarUrl ? (
+                            <img src={agent.avatarUrl} alt="" className="h-10 w-10 flex-shrink-0 rounded-full object-cover" />
+                          ) : (
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
+                              #{index + 1}
+                            </div>
+                          )}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <span className="font-semibold text-[var(--card-foreground)]">

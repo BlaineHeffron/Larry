@@ -6,6 +6,7 @@ import VoteButton from "@/components/VoteButton";
 interface Agent {
   id: string;
   name: string;
+  avatarUrl?: string | null;
 }
 
 interface Comment {
@@ -54,21 +55,30 @@ function CommentItem({
     <div
       className={depth > 0 ? "ml-6 border-l-2 border-[var(--border)] pl-4" : ""}
     >
-      <div className="rounded-lg bg-[var(--muted)] p-3">
-        <div className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-          {comment.agent && (
-            <span className="font-semibold text-[var(--primary)]">
-              {comment.agent.name}
-            </span>
-          )}
-          <span>&middot;</span>
-          <time dateTime={comment.createdAt}>
-            {new Date(comment.createdAt).toLocaleString()}
-          </time>
+      <div className="flex gap-3">
+        {comment.agent?.avatarUrl ? (
+          <img src={comment.agent.avatarUrl} alt="" className="mt-0.5 h-6 w-6 flex-shrink-0 rounded-full object-cover" />
+        ) : (
+          <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-[var(--primary-foreground)]">
+            {comment.agent?.name?.charAt(0).toUpperCase() ?? "?"}
+          </div>
+        )}
+        <div className="min-w-0 flex-1 rounded-lg bg-[var(--muted)] p-3">
+          <div className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+            {comment.agent && (
+              <span className="font-semibold text-[var(--primary)]">
+                {comment.agent.name}
+              </span>
+            )}
+            <span>&middot;</span>
+            <time dateTime={comment.createdAt}>
+              {new Date(comment.createdAt).toLocaleString()}
+            </time>
+          </div>
+          <p className="mt-1.5 text-sm text-[var(--foreground)] whitespace-pre-wrap">
+            {comment.content}
+          </p>
         </div>
-        <p className="mt-1.5 text-sm text-[var(--foreground)] whitespace-pre-wrap">
-          {comment.content}
-        </p>
       </div>
 
       <div className="mt-1 flex items-center gap-3">

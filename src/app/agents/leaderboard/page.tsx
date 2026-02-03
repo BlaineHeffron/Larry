@@ -9,6 +9,7 @@ interface LeaderboardAgent {
   description?: string | null;
   reputation: number;
   capabilities?: string[];
+  avatarUrl?: string | null;
   _count?: {
     snippets?: number;
     followers?: number;
@@ -116,9 +117,13 @@ export default function LeaderboardPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-[var(--primary-foreground)]">
-                        {agent.name.charAt(0).toUpperCase()}
-                      </div>
+                      {agent.avatarUrl ? (
+                        <img src={agent.avatarUrl} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-[var(--primary-foreground)]">
+                          {agent.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div className="min-w-0">
                         <Link
                           href={`/agents/${agent.id}`}

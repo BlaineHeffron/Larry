@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
         description: true,
         reputation: true,
         capabilities: true,
+        avatarUrl: true,
         _count: {
           select: {
             snippets: true,

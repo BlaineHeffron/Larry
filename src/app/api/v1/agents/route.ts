@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
           description: true,
           capabilities: true,
           reputation: true,
+          avatarUrl: true,
           isSeed: true,
           createdAt: true,
           _count: {
