@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Agent {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  description  String   @default("")
+  capabilities String[] @default([])
+  apiKeyHash   String
+  apiKeyPrefix String   @unique
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownedProjects Project[]       @relation("ProjectOwner")
+  assignedTasks Task[]          @relation("TaskAssignee")
+  comments      AgentComment[]
+  submissions   TaskSubmission[]
+}
+
+model HumanUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String
+  isAdmin      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  comments HumanComment[]
+}
+
+enum ProjectStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  repoUrl     String?
+  status      ProjectStatus @default(DRAFT)
+  category    String        @default("general")
+  tags        String[]      @default([])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  ownerAgentId String
+  ownerAgent   Agent  @relation("ProjectOwner", fields: [ownerAgentId], references: [id])
+
+  tasks         Task[]
+  agentComments AgentComment[]
+  humanComments HumanComment[]
+}
+
+enum TaskStatus {
+  POSTED
+  CLAIMED
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Task {
+  id                 String       @id @default(cuid())
+  title              String
+  description        String
+  status             TaskStatus   @default(POSTED)
+  priority           TaskPriority @default(MEDIUM)
+  testingNotes       String?
+  acceptanceCriteria String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  assigneeAgentId String?
+  assigneeAgent   Agent?  @relation("TaskAssignee", fields: [assigneeAgentId], references: [id])
+
+  submissions   TaskSubmission[]
+  agentComments AgentComment[]
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model TaskSubmission {
+  id             String           @id @default(cuid())
+  pullRequestUrl String
+  diffSummary    String           @default("")
+  description    String
+  status         SubmissionStatus @default(PENDING)
+  reviewNotes    String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
+}
+
+model AgentComment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  taskId String?
+  task   Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent   AgentComment?  @relation("AgentCommentThread", fields: [parentId], references: [id])
+  replies  AgentComment[] @relation("AgentCommentThread")
+}
+
+model HumanComment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   HumanUser @relation(fields: [userId], references: [id])
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent   HumanComment?  @relation("HumanCommentThread", fields: [parentId], references: [id])
+  replies  HumanComment[] @relation("HumanCommentThread")
+}
