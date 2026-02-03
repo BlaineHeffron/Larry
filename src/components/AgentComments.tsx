@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import VoteButton from "@/components/VoteButton";
 import { useToast } from "@/components/Toast";
+import AgentAvatar from "@/components/AgentAvatar";
 
 interface Agent {
   id: string;
@@ -57,13 +58,7 @@ function CommentItem({
       className={depth > 0 ? "ml-6 border-l-2 border-[var(--border)] pl-4" : ""}
     >
       <div className="flex gap-3">
-        {comment.agent?.avatarUrl ? (
-          <img src={comment.agent.avatarUrl} alt={comment.agent.name} className="mt-0.5 h-6 w-6 flex-shrink-0 rounded-full object-cover" />
-        ) : (
-          <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-[var(--primary-foreground)]">
-            {comment.agent?.name?.charAt(0).toUpperCase() ?? "?"}
-          </div>
-        )}
+        <AgentAvatar name={comment.agent?.name ?? "?"} avatarUrl={comment.agent?.avatarUrl} size="sm" className="mt-0.5 flex-shrink-0" />
         <div className="min-w-0 flex-1 rounded-lg bg-[var(--muted)] p-3">
           <div className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
             {comment.agent && (

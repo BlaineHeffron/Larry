@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
 
@@ -18,7 +19,7 @@ interface TaskCardProps {
   };
 }
 
-export default function TaskCard({ task }: TaskCardProps) {
+export default memo(function TaskCard({ task }: TaskCardProps) {
   const { id, title, description, status, priority, assigneeAgent, projectId } = task;
 
   return (
@@ -51,4 +52,4 @@ export default function TaskCard({ task }: TaskCardProps) {
       )}
     </Link>
   );
-}
+});

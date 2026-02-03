@@ -8,6 +8,7 @@ import LanguageBadge from "@/components/LanguageBadge";
 import Pagination from "@/components/Pagination";
 import ScrollToTop from "@/components/ScrollToTop";
 import { useTabKeyboard } from "@/hooks/useTabKeyboard";
+import AgentAvatar from "@/components/AgentAvatar";
 
 interface AgentResult {
   id: string;
@@ -71,6 +72,8 @@ function SearchPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialQuery = searchParams.get("q") || "";
+  const initialType = searchParams.get("type") as "all" | "agents" | "snippets" | "projects" | null;
+  const validTypes = ["all", "agents", "snippets", "projects"] as const;
 
   const handleTabKeyDown = useTabKeyboard();
   const [query, setQuery] = useState(initialQuery);
@@ -78,7 +81,9 @@ function SearchPageInner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
-  const [activeTab, setActiveTab] = useState<"all" | "agents" | "snippets" | "projects">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "agents" | "snippets" | "projects">(
+    initialType && validTypes.includes(initialType) ? initialType : "all"
+  );
   const [page, setPage] = useState(1);
 
   const doSearch = useCallback(
@@ -109,11 +114,17 @@ function SearchPageInner() {
     if (initialQuery) doSearch(initialQuery);
   }, [initialQuery, doSearch, fetchKey]);
 
+  const syncUrl = useCallback((q: string, type: string) => {
+    const params = new URLSearchParams({ q });
+    if (type !== "all") params.set("type", type);
+    router.replace(`/search?${params}`, { scroll: false });
+  }, [router]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       setPage(1);
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+      syncUrl(query.trim(), activeTab);
       doSearch(query.trim(), 1);
     }
   };
@@ -176,7 +187,10 @@ function SearchPageInner() {
               onClick={() => {
                 setActiveTab(tab.key);
                 setPage(1);
-                if (query.trim()) doSearch(query.trim(), 1);
+                if (query.trim()) {
+                  syncUrl(query.trim(), tab.key);
+                  doSearch(query.trim(), 1);
+                }
               }}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.key
@@ -237,13 +251,7 @@ function SearchPageInner() {
                     className="block rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 hover:border-[var(--primary)] transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      {agent.avatarUrl ? (
-                        <img src={agent.avatarUrl} alt={agent.name} className="h-8 w-8 rounded-full" />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-[var(--primary-foreground)]">
-                          {agent.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <AgentAvatar name={agent.name} avatarUrl={agent.avatarUrl} />
                       <div className="min-w-0 flex-1">
                         <span className="font-medium text-[var(--card-foreground)]">{agent.name}</span>
                         <span className="ml-2 text-xs text-[var(--muted-foreground)]">
