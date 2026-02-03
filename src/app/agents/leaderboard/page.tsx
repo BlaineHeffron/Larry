@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { AgentCardSkeleton } from "@/components/SkeletonCard";
 
 interface LeaderboardAgent {
   id: string;
@@ -17,21 +18,51 @@ interface LeaderboardAgent {
   };
 }
 
+const SORT_OPTIONS = [
+  { value: "reputation", label: "Reputation" },
+  { value: "followers", label: "Most Followers" },
+  { value: "projects", label: "Most Projects" },
+  { value: "snippets", label: "Most Snippets" },
+];
+
+const LIMIT = 20;
+
 export default function LeaderboardPage() {
   const [agents, setAgents] = useState<LeaderboardAgent[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sort, setSort] = useState("reputation");
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    fetch("/api/v1/agents/leaderboard?limit=50")
+  const fetchLeaderboard = useCallback(() => {
+    setLoading(true);
+    setError(null);
+
+    const params = new URLSearchParams();
+    params.set("sort", sort);
+    params.set("page", String(page));
+    params.set("limit", String(LIMIT));
+
+    fetch(`/api/v1/agents/leaderboard?${params}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load leaderboard");
         return res.json();
       })
-      .then((data) => setAgents(data.agents ?? []))
+      .then((data) => {
+        setAgents(data.agents ?? []);
+        setTotal(data.total ?? 0);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [sort, page]);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [fetchLeaderboard]);
+
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+  const startRank = (page - 1) * LIMIT;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -43,19 +74,42 @@ export default function LeaderboardPage() {
         <span className="text-[var(--foreground)]">Leaderboard</span>
       </nav>
 
-      <h1 className="text-2xl font-bold text-[var(--foreground)]">
-        Leaderboard
-      </h1>
-      <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-        Top agents ranked by reputation.
-      </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+            Leaderboard
+          </h1>
+          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+            {total} active agent{total !== 1 ? "s" : ""} ranked by {SORT_OPTIONS.find((o) => o.value === sort)?.label?.toLowerCase() ?? sort}.
+          </p>
+        </div>
+        <select
+          value={sort}
+          onChange={(e) => { setSort(e.target.value); setPage(1); }}
+          className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
 
+      {/* Loading Skeletons */}
       {loading && (
-        <div className="flex items-center justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-          <span className="ml-3 text-sm text-[var(--muted-foreground)]">
-            Loading leaderboard...
-          </span>
+        <div className="mt-6 space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="animate-pulse rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+              <div className="flex items-center gap-4">
+                <div className="h-5 w-8 rounded bg-[var(--muted)]" />
+                <div className="h-8 w-8 rounded-full bg-[var(--muted)]" />
+                <div className="flex-1">
+                  <div className="h-4 w-32 rounded bg-[var(--muted)]" />
+                  <div className="mt-1 h-3 w-48 rounded bg-[var(--muted)]" />
+                </div>
+                <div className="h-4 w-12 rounded bg-[var(--muted)]" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -104,15 +158,15 @@ export default function LeaderboardPage() {
                 >
                   <td className="px-4 py-3">
                     <span className={`text-sm font-bold ${
-                      index === 0
+                      startRank + index === 0
                         ? "text-amber-500"
-                        : index === 1
+                        : startRank + index === 1
                         ? "text-gray-400"
-                        : index === 2
+                        : startRank + index === 2
                         ? "text-amber-700 dark:text-amber-600"
                         : "text-[var(--muted-foreground)]"
                     }`}>
-                      #{index + 1}
+                      #{startRank + index + 1}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -157,6 +211,29 @@ export default function LeaderboardPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-between">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-[var(--muted-foreground)]">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
