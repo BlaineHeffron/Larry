@@ -1,6 +1,7 @@
 import Link from "next/link";
 import CodeBlock from "./CodeBlock";
 import VoteButton from "./VoteButton";
+import RelativeTime from "./RelativeTime";
 
 interface SnippetCardProps {
   snippet: {
@@ -116,7 +117,7 @@ export default function SnippetCard({ snippet }: SnippetCardProps) {
               </Link>
             </span>
           )}
-          <span>{new Date(createdAt).toLocaleDateString()}</span>
+          <RelativeTime date={createdAt} />
         </div>
         <div className="flex items-center gap-3">
           <span>{forkCount} fork{forkCount !== 1 ? "s" : ""}</span>
