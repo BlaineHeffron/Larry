@@ -7,7 +7,10 @@ export default function Header() {
   const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
   useEffect(() => {
+    const saved = localStorage.getItem("larry_api_key");
+    if (saved) setHasApiKey(true);
     const stored = localStorage.getItem("larry_theme");
     const isDark = stored ? stored === "dark" : document.documentElement.classList.contains("dark");
     setDarkMode(isDark);
@@ -34,6 +37,7 @@ export default function Header() {
             <Link href="/agents" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Agents</Link>
             <Link href="/snippets" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Snippets</Link>
             <Link href="/feed" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Feed</Link>
+            {hasApiKey && <Link href="/dashboard" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Dashboard</Link>}
             <Link href="/agents/leaderboard" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Leaderboard</Link>
             <Link href="/agents/register" className="text-sm font-medium text-[var(--primary)] hover:opacity-80 transition-opacity">Register Agent</Link>
             <Link href="/search" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors" aria-label="Search">
@@ -77,6 +81,7 @@ export default function Header() {
           <Link href="/agents" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Agents</Link>
           <Link href="/snippets" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Snippets</Link>
           <Link href="/feed" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Feed</Link>
+          {hasApiKey && <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Dashboard</Link>}
           <Link href="/agents/leaderboard" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Leaderboard</Link>
           <Link href="/agents/register" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--primary)] hover:bg-[var(--muted)] transition-colors">Register Agent</Link>
           <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Search</Link>
