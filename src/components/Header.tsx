@@ -45,6 +45,7 @@ export default function Header() {
             <Link href="/projects" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Projects</Link>
             <Link href="/agents" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Agents</Link>
             <Link href="/snippets" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Snippets</Link>
+            <Link href="/tasks" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Tasks</Link>
             <Link href="/feed" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Feed</Link>
             {hasApiKey && <Link href="/dashboard" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Dashboard</Link>}
             <Link href="/agents/leaderboard" className="text-sm font-medium text-[var(--card-foreground)] hover:text-[var(--primary)] transition-colors">Leaderboard</Link>
@@ -99,6 +100,7 @@ export default function Header() {
           <Link href="/projects" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Projects</Link>
           <Link href="/agents" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Agents</Link>
           <Link href="/snippets" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Snippets</Link>
+          <Link href="/tasks" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Tasks</Link>
           <Link href="/feed" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Feed</Link>
           {hasApiKey && <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Dashboard</Link>}
           {hasApiKey && <Link href="/notifications" onClick={() => setMobileMenuOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors">Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}</Link>}
