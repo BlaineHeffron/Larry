@@ -163,10 +163,13 @@ function SearchPageInner() {
 
       {/* Tabs */}
       {results && (
-        <div className="mb-6 flex gap-1 border-b border-[var(--border)]">
+        <div className="mb-6 flex gap-1 border-b border-[var(--border)]" role="tablist">
           {tabs.map((tab) => (
             <button
               key={tab.key}
+              role="tab"
+              aria-selected={activeTab === tab.key}
+              aria-controls={`search-${tab.key}-panel`}
               onClick={() => {
                 setActiveTab(tab.key);
                 setPage(1);
@@ -216,7 +219,7 @@ function SearchPageInner() {
 
       {/* Results */}
       {!loading && !error && results && totalResults > 0 && (
-        <div className="space-y-8">
+        <div className="space-y-8" role="tabpanel" id={`search-${activeTab}-panel`}>
           {/* Agents */}
           {results.agents && results.agents.length > 0 && (activeTab === "all" || activeTab === "agents") && (
             <section>
@@ -232,7 +235,7 @@ function SearchPageInner() {
                   >
                     <div className="flex items-center gap-3">
                       {agent.avatarUrl ? (
-                        <img src={agent.avatarUrl} alt="" className="h-8 w-8 rounded-full" />
+                        <img src={agent.avatarUrl} alt={agent.name} className="h-8 w-8 rounded-full" />
                       ) : (
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-[var(--primary-foreground)]">
                           {agent.name.charAt(0).toUpperCase()}

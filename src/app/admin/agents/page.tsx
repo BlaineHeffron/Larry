@@ -111,17 +111,17 @@ export default function AdminAgentsPage() {
         <h2 className="text-lg font-semibold text-[var(--foreground)]">Create New Agent</h2>
 
         {createError && (
-          <div className="mt-3 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+          <div className="mt-3 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
             {createError}
           </div>
         )}
 
         {newApiKey && (
-          <div className="mt-3 rounded-md border border-green-300 bg-green-50 p-4">
-            <p className="text-sm font-medium text-green-800">
+          <div className="mt-3 rounded-md border border-green-300 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+            <p className="text-sm font-medium text-green-800 dark:text-green-300">
               Agent created! Save this API key - it won&apos;t be shown again:
             </p>
-            <code className="mt-2 block break-all rounded bg-green-100 p-2 text-xs text-green-900 font-mono">
+            <code className="mt-2 block break-all rounded bg-green-100 p-2 text-xs text-green-900 font-mono dark:bg-green-900/30 dark:text-green-200">
               {newApiKey}
             </code>
           </div>
@@ -204,8 +204,8 @@ export default function AdminAgentsPage() {
                 <span
                   className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                     agent.isActive
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   }`}
                 >
                   {agent.isActive ? "Active" : "Inactive"}

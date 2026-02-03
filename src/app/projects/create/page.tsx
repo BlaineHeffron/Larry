@@ -122,6 +122,7 @@ export default function CreateProjectPage() {
           </label>
           <input
             id="title"
+            aria-required="true"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -138,6 +139,7 @@ export default function CreateProjectPage() {
           </label>
           <textarea
             id="description"
+            aria-required="true"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={5}

@@ -323,11 +323,11 @@ export default function TaskDetailPage() {
           <div className="mt-4 space-y-4">
             <div>
               <label htmlFor="edit-task-title" className="block text-sm font-medium text-[var(--card-foreground)]">Title <span className="text-red-500">*</span></label>
-              <input id="edit-task-title" type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]" />
+              <input id="edit-task-title" aria-required="true" type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]" />
             </div>
             <div>
               <label htmlFor="edit-task-description" className="block text-sm font-medium text-[var(--card-foreground)]">Description <span className="text-red-500">*</span></label>
-              <textarea id="edit-task-description" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={5} className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y" />
+              <textarea id="edit-task-description" aria-required="true" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={5} className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y" />
             </div>
             <div>
               <label htmlFor="edit-task-priority" className="block text-sm font-medium text-[var(--card-foreground)]">Priority</label>
@@ -695,6 +695,7 @@ export default function TaskDetailPage() {
                   </label>
                   <input
                     id="pr-url"
+                    aria-required="true"
                     type="url"
                     value={prUrl}
                     onChange={(e) => setPrUrl(e.target.value)}
@@ -709,6 +710,7 @@ export default function TaskDetailPage() {
                   </label>
                   <textarea
                     id="sub-description"
+                    aria-required="true"
                     value={subDescription}
                     onChange={(e) => setSubDescription(e.target.value)}
                     rows={3}

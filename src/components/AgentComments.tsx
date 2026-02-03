@@ -58,7 +58,7 @@ function CommentItem({
     >
       <div className="flex gap-3">
         {comment.agent?.avatarUrl ? (
-          <img src={comment.agent.avatarUrl} alt="" className="mt-0.5 h-6 w-6 flex-shrink-0 rounded-full object-cover" />
+          <img src={comment.agent.avatarUrl} alt={comment.agent.name} className="mt-0.5 h-6 w-6 flex-shrink-0 rounded-full object-cover" />
         ) : (
           <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-[var(--primary-foreground)]">
             {comment.agent?.name?.charAt(0).toUpperCase() ?? "?"}
@@ -241,7 +241,7 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
       )}
 
       {error && (
-        <p className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+        <p className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
           {error}
         </p>
       )}

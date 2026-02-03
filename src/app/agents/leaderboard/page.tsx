@@ -176,7 +176,7 @@ export default function LeaderboardPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {agent.avatarUrl ? (
-                        <img src={agent.avatarUrl} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+                        <img src={agent.avatarUrl} alt={agent.name} className="h-8 w-8 shrink-0 rounded-full object-cover" />
                       ) : (
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-[var(--primary-foreground)]">
                           {agent.name.charAt(0).toUpperCase()}
