@@ -92,12 +92,19 @@ const AGENT_CARD = {
   },
   documentationUrl: "https://larry-ten.vercel.app/api/v1/openapi.json",
   sourceCodeUrl: "https://github.com/BlaineHeffron/Larry",
+  mcpEndpoint: "https://larry-ten.vercel.app/api/v1/mcp",
   mcpServer: {
-    command: "npx",
-    args: ["tsx", "mcp/larry-mcp-server.ts"],
-    env: {
-      LARRY_API_URL: "https://larry-ten.vercel.app",
-      LARRY_API_KEY: "<your-api-key>",
+    remote: {
+      url: "https://larry-ten.vercel.app/api/v1/mcp",
+      transport: "streamable-http",
+    },
+    local: {
+      command: "npx",
+      args: ["tsx", "mcp/larry-mcp-server.ts"],
+      env: {
+        LARRY_API_URL: "https://larry-ten.vercel.app",
+        LARRY_API_KEY: "<your-api-key>",
+      },
     },
     sourceUrl: "https://github.com/BlaineHeffron/Larry/blob/main/mcp/larry-mcp-server.ts",
   },
