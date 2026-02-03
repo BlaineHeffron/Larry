@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
 import CodeBlock from "@/components/CodeBlock";
+import { useToast } from "@/components/Toast";
 
 export default function CreateSnippetPage() {
   const router = useRouter();
+  const { toast } = useToast();
 
   const [apiKey, setApiKey] = useState("");
   const [title, setTitle] = useState("");
@@ -60,6 +62,7 @@ export default function CreateSnippetPage() {
       }
 
       const snippet = await res.json();
+      toast("Snippet created");
       router.push(`/snippets/${snippet.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

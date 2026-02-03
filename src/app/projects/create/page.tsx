@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import { useToast } from "@/components/Toast";
 
 const STATUS_OPTIONS = ["DRAFT", "OPEN", "IN_PROGRESS"];
 
 export default function CreateProjectPage() {
   const router = useRouter();
+  const { toast } = useToast();
 
   const [apiKey, setApiKey] = useState("");
   const [title, setTitle] = useState("");
@@ -63,6 +65,7 @@ export default function CreateProjectPage() {
       }
 
       const project = await res.json();
+      toast("Project created");
       router.push(`/projects/${project.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

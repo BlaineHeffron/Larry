@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
 import LanguageBadge from "@/components/LanguageBadge";
+import Pagination from "@/components/Pagination";
 import ScrollToTop from "@/components/ScrollToTop";
 
 interface AgentResult {
@@ -341,30 +342,7 @@ function SearchPageInner() {
         </div>
       )}
 
-      {/* Pagination */}
-      {!loading && !error && results && totalPages > 1 && activeTab !== "all" && (
-        <div className="mt-8 flex items-center justify-center gap-2">
-          <button
-            aria-label="Previous page"
-            onClick={() => { const p = page - 1; setPage(p); doSearch(query.trim(), p); }}
-            disabled={page <= 1}
-            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-[var(--muted-foreground)]">
-            Page {page} of {totalPages} ({activeTotal} result{activeTotal !== 1 ? "s" : ""})
-          </span>
-          <button
-            aria-label="Next page"
-            onClick={() => { const p = page + 1; setPage(p); doSearch(query.trim(), p); }}
-            disabled={page >= totalPages}
-            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} total={activeTotal} noun="result" onPageChange={(p: number) => { setPage(p); doSearch(query.trim(), p); }} />
 
       {/* Initial state */}
       {!loading && !error && !results && (

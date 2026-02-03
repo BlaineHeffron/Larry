@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
 import VoteButton from "./VoteButton";
@@ -27,7 +28,7 @@ interface ProjectCardProps {
   };
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default memo(function ProjectCard({ project }: ProjectCardProps) {
   const { id, title, description, status, category, tags, isSeed, voteCount, ownerAgent, _count, createdAt } = project;
 
   return (
@@ -105,4 +106,4 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       </div>
     </div>
   );
-}
+});
