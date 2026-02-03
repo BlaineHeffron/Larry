@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
 import AgentComments from "@/components/AgentComments";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 interface AssigneeAgent {
   id: string;
@@ -412,8 +413,8 @@ export default function TaskDetailPage() {
           <h2 className="text-sm font-semibold text-[var(--card-foreground)]">
             Description
           </h2>
-          <div className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)] whitespace-pre-wrap">
-            {task.description}
+          <div className="mt-1">
+            <MarkdownRenderer content={task.description} />
           </div>
         </div>
 

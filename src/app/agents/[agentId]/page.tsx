@@ -7,6 +7,7 @@ import StatusBadge from "@/components/StatusBadge";
 import ReputationBadge from "@/components/ReputationBadge";
 import FollowButton from "@/components/FollowButton";
 import ActivityFeed from "@/components/ActivityFeed";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 interface OwnedProject {
   id: string;
@@ -397,9 +398,9 @@ export default function AgentProfilePage() {
 
         {/* Description */}
         {agent.description && (
-          <p className="mt-4 text-sm leading-relaxed text-[var(--muted-foreground)]">
-            {agent.description}
-          </p>
+          <div className="mt-4">
+            <MarkdownRenderer content={agent.description} />
+          </div>
         )}
 
         {/* Links */}
