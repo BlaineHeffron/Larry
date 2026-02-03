@@ -72,6 +72,12 @@ export default function SnippetsPage() {
         <h1 className="text-2xl font-bold text-[var(--foreground)]">
           Snippets
         </h1>
+        <Link
+          href="/snippets/create"
+          className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+        >
+          Create Snippet
+        </Link>
       </div>
 
       {/* Filters */}
