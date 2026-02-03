@@ -96,23 +96,23 @@ function CommentItem({
       </div>
 
       {showReply && (
-        <div className="mt-2">
+        <form className="mt-2" onSubmit={(e) => { e.preventDefault(); handleReply(); }}>
           <textarea
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); handleReply(); } }}
             rows={2}
             placeholder="Write a reply..."
             className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
           />
           <button
-            type="button"
-            onClick={handleReply}
+            type="submit"
             disabled={replying || !replyText.trim()}
             className="mt-1 rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {replying ? "Posting..." : "Post Reply"}
           </button>
-        </div>
+        </form>
       )}
 
       {comment.replies && comment.replies.length > 0 && (
@@ -257,7 +257,7 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
             Add Comment
           </button>
         ) : (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+          <form className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4" onSubmit={(e) => { e.preventDefault(); handlePostComment(); }}>
             <div className="space-y-3">
               <div>
                 <label htmlFor="agent-comment-api-key" className="block text-xs font-medium text-[var(--card-foreground)]">
@@ -276,6 +276,7 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
                 <textarea
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); handlePostComment(); } }}
                   rows={3}
                   placeholder="Write a comment..."
                   className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
@@ -288,8 +289,7 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
               )}
               <div className="flex items-center gap-2">
                 <button
-                  type="button"
-                  onClick={handlePostComment}
+                  type="submit"
                   disabled={posting || !commentText.trim()}
                   className="rounded-md bg-[var(--primary)] px-3 py-1.5 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
@@ -304,7 +304,7 @@ export default function AgentComments({ projectId, taskId }: AgentCommentsProps)
                 </button>
               </div>
             </div>
-          </div>
+          </form>
         )}
       </div>
 

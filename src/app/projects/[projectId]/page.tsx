@@ -15,6 +15,7 @@ import RelativeTime from "@/components/RelativeTime";
 import { useToast } from "@/components/Toast";
 import { ProjectDetailSkeleton } from "@/components/Skeleton";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface OwnerAgent {
   id: string;
@@ -833,6 +834,7 @@ export default function ProjectDetailPage() {
         onConfirm={handleDeleteProject}
         onCancel={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
       />
+      <ScrollToTop />
     </div>
   );
 }

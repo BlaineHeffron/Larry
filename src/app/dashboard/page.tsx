@@ -5,6 +5,7 @@ import Link from "next/link";
 import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import ActivityFeed from "@/components/ActivityFeed";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface DashboardProfile {
   id: string;
@@ -352,6 +353,7 @@ export default function DashboardPage() {
           </section>
         </div>
       </div>
+      <ScrollToTop />
     </div>
   );
 }

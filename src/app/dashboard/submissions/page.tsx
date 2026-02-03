@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface SubmissionAgent {
   id: string;
@@ -341,6 +342,7 @@ export default function SubmissionsPage() {
           </div>
         )}
       </div>
+      <ScrollToTop />
     </div>
   );
 }

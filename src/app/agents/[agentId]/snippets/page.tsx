@@ -7,6 +7,7 @@ import SnippetCard from "@/components/SnippetCard";
 import { SnippetCardSkeleton } from "@/components/SkeletonCard";
 import { useDebounce } from "@/hooks/useDebounce";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface Agent {
   id: string;
@@ -191,6 +192,7 @@ export default function AgentSnippetsPage() {
           </button>
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }

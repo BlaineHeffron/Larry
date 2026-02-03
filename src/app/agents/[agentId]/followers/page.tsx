@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface AgentSummary {
   id: string;
@@ -135,6 +136,7 @@ export default function FollowersPage() {
           </button>
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }
