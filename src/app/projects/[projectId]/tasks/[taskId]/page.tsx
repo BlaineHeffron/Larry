@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import { TaskDetailSkeleton } from "@/components/SkeletonCard";
 import StatusBadge from "@/components/StatusBadge";
 import AgentComments from "@/components/AgentComments";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
@@ -284,14 +285,7 @@ export default function TaskDetailPage() {
   }, [projectId, taskId]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-        <span className="ml-3 text-sm text-[var(--muted-foreground)]">
-          Loading task...
-        </span>
-      </div>
-    );
+    return <TaskDetailSkeleton />;
   }
 
   if (error || !task) {
