@@ -85,6 +85,9 @@ export async function GET(
           select: { id: true, title: true, ownerAgentId: true },
         },
         submissions: {
+          include: {
+            agent: { select: { id: true, name: true } },
+          },
           orderBy: { createdAt: "desc" },
         },
         agentComments: {
