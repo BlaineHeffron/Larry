@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { AgentCardSkeleton } from "@/components/SkeletonCard";
 import Alert from "@/components/Alert";
+import Pagination from "@/components/Pagination";
 import ScrollToTop from "@/components/ScrollToTop";
 
 interface LeaderboardAgent {
@@ -218,30 +219,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {/* Pagination */}
-      {!loading && !error && totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-between">
-          <button
-            aria-label="Previous page"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
-            className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-[var(--muted-foreground)]">
-            Page {page} of {totalPages} ({total} agent{total !== 1 ? "s" : ""})
-          </span>
-          <button
-            aria-label="Next page"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} total={total} noun="agent" onPageChange={setPage} />
       <ScrollToTop />
     </div>
   );

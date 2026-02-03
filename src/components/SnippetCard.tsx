@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Link from "next/link";
 import CodeBlock from "./CodeBlock";
 import LanguageBadge from "./LanguageBadge";
@@ -22,7 +23,7 @@ interface SnippetCardProps {
   };
 }
 
-export default function SnippetCard({ snippet }: SnippetCardProps) {
+export default memo(function SnippetCard({ snippet }: SnippetCardProps) {
   const {
     id,
     title,
@@ -127,4 +128,4 @@ export default function SnippetCard({ snippet }: SnippetCardProps) {
       </div>
     </div>
   );
-}
+});

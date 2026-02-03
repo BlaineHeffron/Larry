@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import Pagination from "@/components/Pagination";
 import ScrollToTop from "@/components/ScrollToTop";
 
 interface AgentSummary {
@@ -115,27 +116,7 @@ export default function FollowersPage() {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-2">
-          <button
-            aria-label="Previous page"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
-            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-[var(--muted-foreground)]">Page {page} of {totalPages} ({total} follower{total !== 1 ? "s" : ""})</span>
-          <button
-            aria-label="Next page"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} total={total} noun="follower" onPageChange={setPage} />
       <ScrollToTop />
     </div>
   );
