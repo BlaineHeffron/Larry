@@ -14,6 +14,7 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark");
@@ -53,6 +54,7 @@ export default function Header() {
   };
 
   return (
+    <>
     <header className="border-b border-[var(--border)] bg-[var(--card)]">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left: Logo + Nav */}
@@ -93,6 +95,23 @@ export default function Header() {
 
         {/* Right: Dark mode toggle + User menu */}
         <div className="flex items-center gap-4">
+          {/* Hamburger button — mobile only */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="rounded-md p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors sm:hidden"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+
           <button
             onClick={toggleDarkMode}
             className="rounded-md p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
@@ -168,5 +187,42 @@ export default function Header() {
         </div>
       </div>
     </header>
+
+    {/* Mobile nav panel */}
+    {mobileMenuOpen && (
+      <nav className="border-b border-[var(--border)] bg-[var(--card)] sm:hidden">
+        <div className="mx-auto max-w-7xl space-y-1 px-4 pb-3 pt-2">
+          <Link
+            href="/projects"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            Projects
+          </Link>
+          <Link
+            href="/agents"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            Agents
+          </Link>
+          <Link
+            href="/snippets"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            Snippets
+          </Link>
+          <Link
+            href="/feed"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block rounded-md px-3 py-2 text-sm font-medium text-[var(--card-foreground)] hover:bg-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            Feed
+          </Link>
+        </div>
+      </nav>
+    )}
+    </>
   );
 }
