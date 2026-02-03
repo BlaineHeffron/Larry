@@ -7,6 +7,7 @@ import StatusBadge from "@/components/StatusBadge";
 import AgentComments from "@/components/AgentComments";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import RelativeTime from "@/components/RelativeTime";
+import { useToast } from "@/components/Toast";
 
 interface AssigneeAgent {
   id: string;
@@ -53,6 +54,7 @@ export default function TaskDetailPage() {
   const projectId = params.projectId as string;
   const taskId = params.taskId as string;
 
+  const { toast } = useToast();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,10 +69,60 @@ export default function TaskDetailPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  // Edit task state
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPriority, setEditPriority] = useState("MEDIUM");
+  const [editAcceptance, setEditAcceptance] = useState("");
+  const [editTesting, setEditTesting] = useState("");
+  const [editGithubUrl, setEditGithubUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   useEffect(() => {
     const saved = localStorage.getItem("larry_api_key");
     if (saved) setApiKey(saved);
   }, []);
+
+  const startEditing = useCallback(() => {
+    if (!task) return;
+    setEditTitle(task.title);
+    setEditDescription(task.description);
+    setEditPriority(task.priority);
+    setEditAcceptance(task.acceptanceCriteria || "");
+    setEditTesting(task.testingNotes || "");
+    setEditGithubUrl(task.githubIssueUrl || "");
+    setSaveError(null);
+    setEditing(true);
+  }, [task]);
+
+  const handleSaveTask = useCallback(async () => {
+    if (saving || !editTitle.trim() || !editDescription.trim()) return;
+    setSaving(true);
+    setSaveError(null);
+    const key = apiKey.trim() || localStorage.getItem("larry_api_key") || "";
+    if (!key) { setSaveError("API key required."); setSaving(false); return; }
+    try {
+      const res = await fetch(`/api/v1/projects/${projectId}/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-api-key": key },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+          priority: editPriority,
+          acceptanceCriteria: editAcceptance.trim() || null,
+          testingNotes: editTesting.trim() || null,
+          githubIssueUrl: editGithubUrl.trim() || null,
+        }),
+      });
+      if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || `Request failed (${res.status})`); }
+      const updated = await res.json();
+      setTask((prev) => (prev ? { ...prev, ...updated } : prev));
+      setEditing(false);
+      toast("Task updated");
+    } catch (err) { setSaveError(err instanceof Error ? err.message : String(err)); } finally { setSaving(false); }
+  }, [saving, editTitle, editDescription, editPriority, editAcceptance, editTesting, editGithubUrl, apiKey, projectId, taskId, toast]);
 
   const handleSubmitWork = useCallback(async () => {
     if (submitting || !prUrl.trim() || !subDescription.trim()) return;
@@ -257,6 +309,59 @@ export default function TaskDetailPage() {
     );
   }
 
+  if (editing) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <nav className="mb-6 text-sm text-[var(--muted-foreground)]">
+          <Link href="/projects" className="hover:text-[var(--primary)]">Projects</Link>
+          <span className="mx-2">/</span>
+          <Link href={`/projects/${projectId}`} className="hover:text-[var(--primary)]">{task.project.title}</Link>
+          <span className="mx-2">/</span>
+          <span className="text-[var(--foreground)]">Edit Task</span>
+        </nav>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
+          <h2 className="text-xl font-bold text-[var(--card-foreground)]">Edit Task</h2>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label htmlFor="edit-task-title" className="block text-sm font-medium text-[var(--card-foreground)]">Title <span className="text-red-500">*</span></label>
+              <input id="edit-task-title" type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]" />
+            </div>
+            <div>
+              <label htmlFor="edit-task-description" className="block text-sm font-medium text-[var(--card-foreground)]">Description <span className="text-red-500">*</span></label>
+              <textarea id="edit-task-description" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={5} className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y" />
+            </div>
+            <div>
+              <label htmlFor="edit-task-priority" className="block text-sm font-medium text-[var(--card-foreground)]">Priority</label>
+              <select id="edit-task-priority" value={editPriority} onChange={(e) => setEditPriority(e.target.value)} className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]">
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="edit-task-acceptance" className="block text-sm font-medium text-[var(--card-foreground)]">Acceptance Criteria <span className="text-xs font-normal text-[var(--muted-foreground)]">(optional)</span></label>
+              <textarea id="edit-task-acceptance" value={editAcceptance} onChange={(e) => setEditAcceptance(e.target.value)} rows={2} placeholder="What defines done?" className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y" />
+            </div>
+            <div>
+              <label htmlFor="edit-task-testing" className="block text-sm font-medium text-[var(--card-foreground)]">Testing Notes <span className="text-xs font-normal text-[var(--muted-foreground)]">(optional)</span></label>
+              <textarea id="edit-task-testing" value={editTesting} onChange={(e) => setEditTesting(e.target.value)} rows={2} placeholder="How to test this?" className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y" />
+            </div>
+            <div>
+              <label htmlFor="edit-task-github" className="block text-sm font-medium text-[var(--card-foreground)]">GitHub Issue URL <span className="text-xs font-normal text-[var(--muted-foreground)]">(optional)</span></label>
+              <input id="edit-task-github" type="url" value={editGithubUrl} onChange={(e) => setEditGithubUrl(e.target.value)} placeholder="https://github.com/owner/repo/issues/123" className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]" />
+            </div>
+            {saveError && (<div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">{saveError}</div>)}
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={handleSaveTask} disabled={saving || !editTitle.trim() || !editDescription.trim()} className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50">{saving ? "Saving..." : "Save Changes"}</button>
+              <button type="button" onClick={() => { setEditing(false); setSaveError(null); }} className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Breadcrumb */}
@@ -361,9 +466,18 @@ export default function TaskDetailPage() {
           </p>
         )}
 
-        {/* Delete Button */}
+        {/* Edit & Delete Buttons */}
         {apiKey && (
-          <div className="mt-3">
+          <div className="mt-3 flex items-center gap-2">
+            {task.status === "POSTED" && (
+              <button
+                type="button"
+                onClick={startEditing}
+                className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              >
+                Edit
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
