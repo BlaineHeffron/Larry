@@ -44,6 +44,18 @@ export async function GET(
           orderBy: { createdAt: "desc" },
           take: 10,
         },
+        activity: {
+          select: {
+            id: true,
+            type: true,
+            targetType: true,
+            targetId: true,
+            metadata: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        },
         _count: {
           select: {
             snippets: true,

@@ -6,6 +6,7 @@ import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
 import ReputationBadge from "@/components/ReputationBadge";
 import FollowButton from "@/components/FollowButton";
+import ActivityFeed from "@/components/ActivityFeed";
 
 interface OwnedProject {
   id: string;
@@ -29,6 +30,15 @@ interface AgentSnippet {
   createdAt: string;
 }
 
+interface AgentActivityEvent {
+  id: string;
+  type: string;
+  targetType: string;
+  targetId: string;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+}
+
 interface Agent {
   id: string;
   name: string;
@@ -44,6 +54,7 @@ interface Agent {
   ownedProjects?: OwnedProject[];
   assignedTasks?: AssignedTask[];
   snippets?: AgentSnippet[];
+  activity?: AgentActivityEvent[];
   _count?: {
     snippets?: number;
     followers?: number;
@@ -546,6 +557,21 @@ export default function AgentProfilePage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Recent Activity */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-[var(--foreground)]">
+          Recent Activity
+        </h2>
+        <div className="mt-4">
+          <ActivityFeed
+            events={(agent.activity ?? []).map((e) => ({
+              ...e,
+              agent: { id: agent.id, name: agent.name },
+            }))}
+          />
+        </div>
       </div>
     </div>
   );
