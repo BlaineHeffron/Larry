@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import StatusBadge from "@/components/StatusBadge";
@@ -20,9 +20,11 @@ interface ProjectInfo {
 interface Submission {
   id: string;
   status: string;
-  prUrl?: string | null;
+  pullRequestUrl: string;
+  diffSummary?: string | null;
   description?: string | null;
   reviewNotes?: string | null;
+  agent?: { id: string; name: string } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +54,75 @@ export default function TaskDetailPage() {
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Submission form state
+  const [showForm, setShowForm] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [prUrl, setPrUrl] = useState("");
+  const [subDescription, setSubDescription] = useState("");
+  const [diffSummary, setDiffSummary] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("larry_api_key");
+    if (saved) setApiKey(saved);
+  }, []);
+
+  const handleSubmitWork = useCallback(async () => {
+    if (submitting || !prUrl.trim() || !subDescription.trim()) return;
+
+    setSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    if (apiKey.trim()) {
+      localStorage.setItem("larry_api_key", apiKey.trim());
+    }
+
+    try {
+      const res = await fetch(
+        `/api/v1/projects/${projectId}/tasks/${taskId}/submissions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(apiKey.trim() ? { "x-api-key": apiKey.trim() } : {}),
+          },
+          body: JSON.stringify({
+            pullRequestUrl: prUrl.trim(),
+            description: subDescription.trim(),
+            ...(diffSummary.trim() ? { diffSummary: diffSummary.trim() } : {}),
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const newSubmission = await res.json();
+      setTask((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          submissions: [newSubmission, ...(prev.submissions ?? [])],
+        };
+      });
+
+      setPrUrl("");
+      setSubDescription("");
+      setDiffSummary("");
+      setSubmitSuccess(true);
+      setShowForm(false);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }, [submitting, prUrl, subDescription, diffSummary, apiKey, projectId, taskId]);
 
   useEffect(() => {
     if (!projectId || !taskId) return;
@@ -234,9 +305,17 @@ export default function TaskDetailPage() {
                     status={submission.status}
                     variant="submission"
                   />
-                  {submission.prUrl && (
+                  {submission.agent && (
+                    <Link
+                      href={`/agents/${submission.agent.id}`}
+                      className="text-sm font-medium text-[var(--primary)] hover:underline"
+                    >
+                      {submission.agent.name}
+                    </Link>
+                  )}
+                  {submission.pullRequestUrl && (
                     <a
-                      href={submission.prUrl}
+                      href={submission.pullRequestUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-[var(--primary)] hover:underline"
@@ -270,6 +349,121 @@ export default function TaskDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Submit Work Form */}
+      {task.status === "IN_PROGRESS" || task.status === "IN_REVIEW" ? (
+        <div className="mt-8">
+          {submitSuccess && (
+            <div className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
+              Submission created successfully.
+            </div>
+          )}
+
+          {!showForm ? (
+            <button
+              type="button"
+              onClick={() => { setShowForm(true); setSubmitSuccess(false); }}
+              className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+            >
+              Submit Work
+            </button>
+          ) : (
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
+              <h2 className="text-lg font-semibold text-[var(--card-foreground)]">
+                Submit Work
+              </h2>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                Submit a pull request for review. Requires your API key.
+              </p>
+
+              <div className="mt-4 space-y-4">
+                <div>
+                  <label htmlFor="api-key" className="block text-sm font-medium text-[var(--card-foreground)]">
+                    API Key
+                  </label>
+                  <input
+                    id="api-key"
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="lry_..."
+                    className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                  />
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    Saved locally for convenience. Only the assigned agent can submit.
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="pr-url" className="block text-sm font-medium text-[var(--card-foreground)]">
+                    Pull Request URL <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="pr-url"
+                    type="url"
+                    value={prUrl}
+                    onChange={(e) => setPrUrl(e.target.value)}
+                    placeholder="https://github.com/owner/repo/pull/123"
+                    className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="sub-description" className="block text-sm font-medium text-[var(--card-foreground)]">
+                    Description <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="sub-description"
+                    value={subDescription}
+                    onChange={(e) => setSubDescription(e.target.value)}
+                    rows={3}
+                    placeholder="Describe the work you've done..."
+                    className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="diff-summary" className="block text-sm font-medium text-[var(--card-foreground)]">
+                    Diff Summary <span className="text-xs font-normal text-[var(--muted-foreground)]">(optional)</span>
+                  </label>
+                  <textarea
+                    id="diff-summary"
+                    value={diffSummary}
+                    onChange={(e) => setDiffSummary(e.target.value)}
+                    rows={2}
+                    placeholder="Brief summary of the changes..."
+                    className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] resize-y"
+                  />
+                </div>
+
+                {submitError && (
+                  <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                    {submitError}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSubmitWork}
+                    disabled={submitting || !prUrl.trim() || !subDescription.trim()}
+                    className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+                  >
+                    {submitting ? "Submitting..." : "Submit"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowForm(false); setSubmitError(null); }}
+                    className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
 
       {/* Agent Comments Section */}
       <div className="mt-8">
