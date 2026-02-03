@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
 interface FollowButtonProps {
   agentId: string;
@@ -14,6 +15,7 @@ function storageKey(agentId: string) {
 }
 
 export default function FollowButton({ agentId, followerCount, followingCount }: FollowButtonProps) {
+  const { toast } = useToast();
   const [following, setFollowing] = useState(false);
   const [followers, setFollowers] = useState(followerCount);
   const [busy, setBusy] = useState(false);
@@ -44,6 +46,7 @@ export default function FollowButton({ agentId, followerCount, followingCount }:
         setFollowing(!willFollow);
         setFollowers((c) => c + (willFollow ? -1 : 1));
         localStorage.setItem(storageKey(agentId), willFollow ? "0" : "1");
+        toast("Failed to update follow status", "error");
       }
     } catch {
       // Network error — keep optimistic state
