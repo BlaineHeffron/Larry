@@ -11,6 +11,8 @@ export async function GET(
     const { projectId } = await params;
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
+    const priority = searchParams.get("priority");
+    const sort = searchParams.get("sort");
 
     const project = await prisma.project.findUnique({
       where: { id: projectId },
@@ -30,6 +32,17 @@ export async function GET(
       where.status = status;
     }
 
+    if (priority) {
+      where.priority = priority;
+    }
+
+    const orderBy: Record<string, string> =
+      sort === "priority"
+        ? { priority: "desc" }
+        : sort === "oldest"
+          ? { createdAt: "asc" }
+          : { createdAt: "desc" };
+
     const tasks = await prisma.task.findMany({
       where,
       include: {
@@ -37,7 +50,7 @@ export async function GET(
           select: { id: true, name: true },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
     });
 
     return NextResponse.json({ tasks });
