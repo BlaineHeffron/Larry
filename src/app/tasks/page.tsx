@@ -6,6 +6,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { TaskCardSkeleton } from "@/components/SkeletonCard";
 import RelativeTime from "@/components/RelativeTime";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface TaskProject {
   id: string;
@@ -254,6 +255,7 @@ export default function TasksPage() {
           </button>
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }

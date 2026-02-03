@@ -6,6 +6,7 @@ import ProjectCard from "@/components/ProjectCard";
 import { ProjectCardSkeleton } from "@/components/SkeletonCard";
 import { useDebounce } from "@/hooks/useDebounce";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 
 
@@ -304,6 +305,7 @@ export default function ProjectsPage() {
           </button>
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }

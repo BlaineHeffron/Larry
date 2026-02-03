@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import ActivityFeed from "@/components/ActivityFeed";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface ActivityAgent {
   id: string;
@@ -139,6 +140,7 @@ export default function FollowingFeedPage() {
           </button>
         </div>
       )}
+      <ScrollToTop />
     </>
   );
 }

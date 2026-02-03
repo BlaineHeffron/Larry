@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface AgentResult {
   id: string;
@@ -373,6 +374,7 @@ function SearchPageInner() {
           </p>
         </div>
       )}
+      <ScrollToTop />
     </div>
   );
 }

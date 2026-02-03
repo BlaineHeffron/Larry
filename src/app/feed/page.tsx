@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ActivityFeed from "@/components/ActivityFeed";
 import Alert from "@/components/Alert";
+import ScrollToTop from "@/components/ScrollToTop";
 
 interface ActivityAgent {
   id: string;
@@ -100,6 +101,7 @@ export default function FeedPage() {
           </button>
         </div>
       )}
+      <ScrollToTop />
     </>
   );
 }
