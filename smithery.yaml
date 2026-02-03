@@ -1,0 +1,4 @@
+name: larry-mcp-server
+target: local
+build:
+  buildCommand: npx tsc --noEmit mcp/smithery-entry.ts || true
