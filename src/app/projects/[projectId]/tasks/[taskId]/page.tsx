@@ -124,15 +124,15 @@ export default function TaskDetailPage() {
     }
   }, [submitting, prUrl, subDescription, diffSummary, apiKey, projectId, taskId]);
 
-  // Claim task handler
-  const [claiming, setClaiming] = useState(false);
-  const [claimError, setClaimError] = useState<string | null>(null);
+  // Status transition handler
+  const [transitioning, setTransitioning] = useState(false);
+  const [transitionError, setTransitionError] = useState<string | null>(null);
 
-  const handleClaimTask = useCallback(async () => {
-    if (claiming) return;
+  const handleStatusTransition = useCallback(async (newStatus: string) => {
+    if (transitioning) return;
 
-    setClaiming(true);
-    setClaimError(null);
+    setTransitioning(true);
+    setTransitionError(null);
 
     if (apiKey.trim()) {
       localStorage.setItem("larry_api_key", apiKey.trim());
@@ -147,7 +147,7 @@ export default function TaskDetailPage() {
             "Content-Type": "application/json",
             ...(apiKey.trim() ? { "x-api-key": apiKey.trim() } : {}),
           },
-          body: JSON.stringify({ status: "CLAIMED" }),
+          body: JSON.stringify({ status: newStatus }),
         }
       );
 
@@ -162,11 +162,11 @@ export default function TaskDetailPage() {
         return { ...prev, status: updated.status, assigneeAgent: updated.assigneeAgent };
       });
     } catch (err) {
-      setClaimError(err instanceof Error ? err.message : String(err));
+      setTransitionError(err instanceof Error ? err.message : String(err));
     } finally {
-      setClaiming(false);
+      setTransitioning(false);
     }
-  }, [claiming, apiKey, projectId, taskId]);
+  }, [transitioning, apiKey, projectId, taskId]);
 
   useEffect(() => {
     if (!projectId || !taskId) return;
@@ -247,28 +247,78 @@ export default function TaskDetailPage() {
           <StatusBadge status={task.priority} variant="priority" />
         </div>
 
-        {/* Claim Task */}
-        {task.status === "POSTED" && (
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+        {/* Status Actions */}
+        {apiKey && task.status !== "COMPLETED" && task.status !== "CANCELLED" && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {task.status === "POSTED" && (
+              <button
+                type="button"
+                onClick={() => handleStatusTransition("CLAIMED")}
+                disabled={transitioning}
+                className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {transitioning ? "Updating..." : "Claim Task"}
+              </button>
+            )}
+            {task.status === "CLAIMED" && (
+              <button
+                type="button"
+                onClick={() => handleStatusTransition("IN_PROGRESS")}
+                disabled={transitioning}
+                className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {transitioning ? "Updating..." : "Start Working"}
+              </button>
+            )}
+            {task.status === "IN_PROGRESS" && (
+              <button
+                type="button"
+                onClick={() => handleStatusTransition("IN_REVIEW")}
+                disabled={transitioning}
+                className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {transitioning ? "Updating..." : "Submit for Review"}
+              </button>
+            )}
+            {task.status === "IN_REVIEW" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleStatusTransition("COMPLETED")}
+                  disabled={transitioning}
+                  className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {transitioning ? "Updating..." : "Approve & Complete"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStatusTransition("IN_PROGRESS")}
+                  disabled={transitioning}
+                  className="rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-400"
+                >
+                  {transitioning ? "Updating..." : "Request Changes"}
+                </button>
+              </>
+            )}
             <button
               type="button"
-              onClick={handleClaimTask}
-              disabled={claiming}
-              className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-opacity disabled:opacity-50"
+              onClick={() => handleStatusTransition("CANCELLED")}
+              disabled={transitioning}
+              className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
             >
-              {claiming ? "Claiming..." : "Claim Task"}
+              Cancel Task
             </button>
-            {!apiKey && (
-              <span className="text-xs text-[var(--muted-foreground)]">
-                Requires API key (enter below in Submit Work)
-              </span>
-            )}
-            {claimError && (
+            {transitionError && (
               <span className="text-xs text-red-600 dark:text-red-400">
-                {claimError}
+                {transitionError}
               </span>
             )}
           </div>
+        )}
+        {!apiKey && task.status === "POSTED" && (
+          <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+            Enter your API key below to claim this task.
+          </p>
         )}
 
         {/* GitHub Issue Link */}
