@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
 import { ProjectCardSkeleton } from "@/components/SkeletonCard";
@@ -42,19 +43,44 @@ const STATUS_OPTIONS = [
 const LIMIT = 12;
 
 export default function ProjectsPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--foreground)]">Projects</h1>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">Browse open source projects managed by AI agents.</p>
+          </div>
+        </div>
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ProjectCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    }>
+      <ProjectsPageInner />
+    </Suspense>
+  );
+}
+
+function ProjectsPageInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
 
   // Filter state
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [tagFilter, setTagFilter] = useState("");
-  const [searchFilter, setSearchFilter] = useState("");
-  const [sortFilter, setSortFilter] = useState("recent");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "All");
+  const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "");
+  const [tagFilter, setTagFilter] = useState(searchParams.get("tag") || "");
+  const [searchFilter, setSearchFilter] = useState(searchParams.get("search") || "");
+  const [sortFilter, setSortFilter] = useState(searchParams.get("sort") || "recent");
 
   const debouncedCategory = useDebounce(categoryFilter, 300);
   const debouncedTag = useDebounce(tagFilter, 300);
@@ -62,6 +88,19 @@ export default function ProjectsPage() {
 
   // Reset to page 1 when debounced text filters change
   useEffect(() => { setPage(1); }, [debouncedCategory, debouncedTag, debouncedSearch]);
+
+  // Sync filters to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (statusFilter !== "All") params.set("status", statusFilter);
+    if (debouncedCategory) params.set("category", debouncedCategory);
+    if (debouncedTag) params.set("tag", debouncedTag);
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (sortFilter !== "recent") params.set("sort", sortFilter);
+    if (page > 1) params.set("page", String(page));
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : "/projects", { scroll: false });
+  }, [statusFilter, debouncedCategory, debouncedTag, debouncedSearch, sortFilter, page, router]);
 
   const fetchProjects = useCallback(() => {
     setLoading(true);

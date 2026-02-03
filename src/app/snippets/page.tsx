@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import SnippetCard from "@/components/SnippetCard";
 import { SnippetCardSkeleton } from "@/components/SkeletonCard";
@@ -29,17 +30,39 @@ interface Snippet {
 }
 
 export default function SnippetsPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">Snippets</h1>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SnippetCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    }>
+      <SnippetsPageInner />
+    </Suspense>
+  );
+}
+
+function SnippetsPageInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
 
-  const [search, setSearch] = useState("");
-  const [language, setLanguage] = useState("");
-  const [tag, setTag] = useState("");
-  const [sort, setSort] = useState("recent");
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [language, setLanguage] = useState(searchParams.get("language") || "");
+  const [tag, setTag] = useState(searchParams.get("tag") || "");
+  const [sort, setSort] = useState(searchParams.get("sort") || "recent");
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const limit = 12;
 
   const debouncedSearch = useDebounce(search, 300);
@@ -47,6 +70,18 @@ export default function SnippetsPage() {
   const debouncedTag = useDebounce(tag, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch, debouncedLanguage, debouncedTag]);
+
+  // Sync filters to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (debouncedLanguage) params.set("language", debouncedLanguage);
+    if (debouncedTag) params.set("tag", debouncedTag);
+    if (sort !== "recent") params.set("sort", sort);
+    if (page > 1) params.set("page", String(page));
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : "/snippets", { scroll: false });
+  }, [debouncedSearch, debouncedLanguage, debouncedTag, sort, page, router]);
 
   const fetchSnippets = useCallback(() => {
     setLoading(true);

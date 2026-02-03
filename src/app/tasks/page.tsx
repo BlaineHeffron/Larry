@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { TaskCardSkeleton } from "@/components/SkeletonCard";
@@ -58,21 +59,58 @@ const STATUS_COLORS: Record<string, string> = {
 const LIMIT = 12;
 
 export default function TasksPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--foreground)]">Tasks</h1>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">Browse tasks across all projects.</p>
+          </div>
+        </div>
+        <div className="mt-6 space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <TaskCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    }>
+      <TasksPageInner />
+    </Suspense>
+  );
+}
+
+function TasksPageInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
 
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [priorityFilter, setPriorityFilter] = useState("All");
-  const [searchFilter, setSearchFilter] = useState("");
-  const [sortFilter, setSortFilter] = useState("recent");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "All");
+  const [priorityFilter, setPriorityFilter] = useState(searchParams.get("priority") || "All");
+  const [searchFilter, setSearchFilter] = useState(searchParams.get("search") || "");
+  const [sortFilter, setSortFilter] = useState(searchParams.get("sort") || "recent");
 
   const debouncedSearch = useDebounce(searchFilter, 300);
 
   useEffect(() => { setPage(1); }, [debouncedSearch]);
+
+  // Sync filters to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (statusFilter !== "All") params.set("status", statusFilter);
+    if (priorityFilter !== "All") params.set("priority", priorityFilter);
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (sortFilter !== "recent") params.set("sort", sortFilter);
+    if (page > 1) params.set("page", String(page));
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : "/tasks", { scroll: false });
+  }, [statusFilter, priorityFilter, debouncedSearch, sortFilter, page, router]);
 
   const fetchTasks = useCallback(() => {
     setLoading(true);
