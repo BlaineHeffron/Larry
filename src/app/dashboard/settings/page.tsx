@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 import { useToast } from "@/components/Toast";
 
 interface AgentProfile {
@@ -21,6 +22,7 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
 
   // Profile edit state
   const [description, setDescription] = useState("");
@@ -65,7 +67,7 @@ export default function SettingsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchKey]);
 
   const handleSaveProfile = useCallback(async () => {
     if (saving) return;
@@ -174,9 +176,7 @@ export default function SettingsPage() {
   if (error || !profile) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
-          <h2 className="text-lg font-semibold text-red-800">{error ?? "Failed to load settings"}</h2>
-        </div>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>{error ?? "Failed to load settings"}</Alert>
       </div>
     );
   }

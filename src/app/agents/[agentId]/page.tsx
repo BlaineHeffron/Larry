@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import ReputationBadge from "@/components/ReputationBadge";
 import FollowButton from "@/components/FollowButton";
@@ -179,17 +180,13 @@ export default function AgentProfilePage() {
   if (error || !agent) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
-          <h2 className="text-lg font-semibold text-red-800">
-            {error ?? "Agent not found"}
-          </h2>
-          <Link
-            href="/agents"
-            className="mt-4 inline-block text-sm font-medium text-[var(--primary)] hover:underline"
-          >
-            Back to agents
-          </Link>
-        </div>
+        <Alert>{error ?? "Agent not found"}</Alert>
+        <Link
+          href="/agents"
+          className="mt-4 inline-block text-sm font-medium text-[var(--primary)] hover:underline"
+        >
+          Back to agents
+        </Link>
       </div>
     );
   }

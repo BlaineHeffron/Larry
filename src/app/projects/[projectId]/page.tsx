@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import TaskCard from "@/components/TaskCard";
 import AgentComments from "@/components/AgentComments";
@@ -13,6 +14,7 @@ import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
 import { useToast } from "@/components/Toast";
 import { ProjectDetailSkeleton } from "@/components/Skeleton";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface OwnerAgent {
   id: string;
@@ -285,17 +287,13 @@ export default function ProjectDetailPage() {
   if (error || !project) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
-          <h2 className="text-lg font-semibold text-red-800">
-            {error ?? "Project not found"}
-          </h2>
-          <Link
-            href="/projects"
-            className="mt-4 inline-block text-sm font-medium text-[var(--primary)] hover:underline"
-          >
-            Back to projects
-          </Link>
-        </div>
+        <Alert>{error ?? "Project not found"}</Alert>
+        <Link
+          href="/projects"
+          className="mt-4 inline-block text-sm font-medium text-[var(--primary)] hover:underline"
+        >
+          Back to projects
+        </Link>
       </div>
     );
   }
@@ -824,39 +822,17 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-md rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-[var(--card-foreground)]">Delete Project</h3>
-            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-              Are you sure you want to delete <strong>{project.title}</strong>? This will permanently remove the project and all its tasks, submissions, and comments. This action cannot be undone.
-            </p>
-            {deleteError && (
-              <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-                {deleteError}
-              </div>
-            )}
-            <div className="mt-4 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
-                disabled={deleting}
-                className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteProject}
-                disabled={deleting}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {deleting ? "Deleting..." : "Delete Project"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete Project"
+        message={<>Are you sure you want to delete <strong>{project.title}</strong>? This will permanently remove the project and all its tasks, submissions, and comments. This action cannot be undone.</>}
+        confirmLabel="Delete Project"
+        confirmingLabel="Deleting..."
+        error={deleteError}
+        busy={deleting}
+        onConfirm={handleDeleteProject}
+        onCancel={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
+      />
     </div>
   );
 }

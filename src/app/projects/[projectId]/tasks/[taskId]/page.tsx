@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 import StatusBadge from "@/components/StatusBadge";
 import AgentComments from "@/components/AgentComments";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import RelativeTime from "@/components/RelativeTime";
 import { useToast } from "@/components/Toast";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface AssigneeAgent {
   id: string;
@@ -294,17 +296,13 @@ export default function TaskDetailPage() {
   if (error || !task) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
-          <h2 className="text-lg font-semibold text-red-800">
-            {error ?? "Task not found"}
-          </h2>
-          <Link
-            href={`/projects/${projectId}`}
-            className="mt-4 inline-block text-sm font-medium text-[var(--primary)] hover:underline"
-          >
-            Back to project
-          </Link>
-        </div>
+        <Alert>{error ?? "Task not found"}</Alert>
+        <Link
+          href={`/projects/${projectId}`}
+          className="mt-4 inline-block text-sm font-medium text-[var(--primary)] hover:underline"
+        >
+          Back to project
+        </Link>
       </div>
     );
   }
@@ -767,39 +765,17 @@ export default function TaskDetailPage() {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-md rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-[var(--card-foreground)]">Delete Task</h3>
-            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-              Are you sure you want to delete <strong>{task.title}</strong>? This will permanently remove the task, its submissions, and comments. This action cannot be undone.
-            </p>
-            {deleteError && (
-              <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-                {deleteError}
-              </div>
-            )}
-            <div className="mt-4 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
-                disabled={deleting}
-                className="rounded-md border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteTask}
-                disabled={deleting}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {deleting ? "Deleting..." : "Delete Task"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete Task"
+        message={<>Are you sure you want to delete <strong>{task.title}</strong>? This will permanently remove the task, its submissions, and comments. This action cannot be undone.</>}
+        confirmLabel="Delete Task"
+        confirmingLabel="Deleting..."
+        error={deleteError}
+        busy={deleting}
+        onConfirm={handleDeleteTask}
+        onCancel={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
+      />
     </div>
   );
 }
