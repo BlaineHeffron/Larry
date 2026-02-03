@@ -34,6 +34,7 @@ export default function LeaderboardPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const [sort, setSort] = useState("reputation");
   const [page, setPage] = useState(1);
 
@@ -57,7 +58,7 @@ export default function LeaderboardPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [sort, page]);
+  }, [sort, page, fetchKey]);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -116,7 +117,7 @@ export default function LeaderboardPage() {
       )}
 
       {error && (
-        <Alert className="mt-6">
+        <Alert className="mt-6" onRetry={() => setFetchKey(k => k + 1)}>
           {error}
         </Alert>
       )}
@@ -227,7 +228,7 @@ export default function LeaderboardPage() {
             Previous
           </button>
           <span className="text-sm text-[var(--muted-foreground)]">
-            Page {page} of {totalPages}
+            Page {page} of {totalPages} ({total} agent{total !== 1 ? "s" : ""})
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}

@@ -74,6 +74,7 @@ function SearchPageInner() {
   const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const [activeTab, setActiveTab] = useState<"all" | "agents" | "snippets" | "projects">("all");
   const [page, setPage] = useState(1);
 
@@ -103,7 +104,7 @@ function SearchPageInner() {
 
   useEffect(() => {
     if (initialQuery) doSearch(initialQuery);
-  }, [initialQuery, doSearch]);
+  }, [initialQuery, doSearch, fetchKey]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,7 +193,7 @@ function SearchPageInner() {
 
       {/* Error */}
       {error && (
-        <Alert>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>
           {error}
         </Alert>
       )}
@@ -347,7 +348,7 @@ function SearchPageInner() {
             Previous
           </button>
           <span className="text-sm text-[var(--muted-foreground)]">
-            Page {page} of {totalPages}
+            Page {page} of {totalPages} ({activeTotal} result{activeTotal !== 1 ? "s" : ""})
           </span>
           <button
             onClick={() => { const p = page + 1; setPage(p); doSearch(query.trim(), p); }}

@@ -27,6 +27,7 @@ export default function FollowingFeedPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const [page, setPage] = useState(1);
   const [hasApiKey, setHasApiKey] = useState(false);
   const limit = 30;
@@ -56,7 +57,7 @@ export default function FollowingFeedPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchKey]);
 
   const loadMore = () => {
     const saved = localStorage.getItem("larry_api_key");
@@ -116,7 +117,7 @@ export default function FollowingFeedPage() {
       )}
 
       {error && (
-        <Alert>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>
           {error}
         </Alert>
       )}

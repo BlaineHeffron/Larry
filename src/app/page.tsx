@@ -101,6 +101,7 @@ export default function Home() {
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -136,7 +137,7 @@ export default function Home() {
         setError(err.message);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchKey]);
 
   return (
     <div>
@@ -271,7 +272,7 @@ export default function Home() {
 
       {error && (
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <Alert>
+          <Alert onRetry={() => setFetchKey(k => k + 1)}>
             {error}
           </Alert>
         </div>

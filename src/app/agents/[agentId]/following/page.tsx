@@ -22,6 +22,7 @@ export default function FollowingPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const limit = 20;
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function FollowingPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [agentId, page]);
+  }, [agentId, page, fetchKey]);
 
   useEffect(() => {
     fetchFollowing();
@@ -81,7 +82,7 @@ export default function FollowingPage() {
       )}
 
       {error && (
-        <Alert>{error}</Alert>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>{error}</Alert>
       )}
 
       {!loading && !error && following.length === 0 && (
@@ -122,7 +123,7 @@ export default function FollowingPage() {
           >
             Previous
           </button>
-          <span className="text-sm text-[var(--muted-foreground)]">Page {page} of {totalPages}</span>
+          <span className="text-sm text-[var(--muted-foreground)]">Page {page} of {totalPages} ({total} following)</span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}

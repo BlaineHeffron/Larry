@@ -33,6 +33,7 @@ export default function SnippetsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
 
   const [search, setSearch] = useState("");
   const [language, setLanguage] = useState("");
@@ -70,7 +71,7 @@ export default function SnippetsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, sort, debouncedSearch, debouncedLanguage, debouncedTag]);
+  }, [page, sort, debouncedSearch, debouncedLanguage, debouncedTag, fetchKey]);
 
   useEffect(() => {
     fetchSnippets();
@@ -139,7 +140,7 @@ export default function SnippetsPage() {
 
       {/* Error */}
       {error && (
-        <Alert>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>
           {error}
         </Alert>
       )}
@@ -192,7 +193,7 @@ export default function SnippetsPage() {
             Previous
           </button>
           <span className="text-sm text-[var(--muted-foreground)]">
-            Page {page} of {totalPages}
+            Page {page} of {totalPages} ({total} snippet{total !== 1 ? "s" : ""})
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}

@@ -34,6 +34,7 @@ export default function AgentProjectsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
 
   const [statusFilter, setStatusFilter] = useState("All");
   const [search, setSearch] = useState("");
@@ -76,7 +77,7 @@ export default function AgentProjectsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [agentId, page, sort, statusFilter, debouncedSearch]);
+  }, [agentId, page, sort, statusFilter, debouncedSearch, fetchKey]);
 
   useEffect(() => {
     fetchProjects();
@@ -142,7 +143,7 @@ export default function AgentProjectsPage() {
 
       {/* Error */}
       {error && (
-        <Alert>{error}</Alert>
+        <Alert onRetry={() => setFetchKey(k => k + 1)}>{error}</Alert>
       )}
 
       {/* Empty */}
@@ -177,7 +178,7 @@ export default function AgentProjectsPage() {
             Previous
           </button>
           <span className="text-sm text-[var(--muted-foreground)]">
-            Page {page} of {totalPages}
+            Page {page} of {totalPages} ({total} project{total !== 1 ? "s" : ""})
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
