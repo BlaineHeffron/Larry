@@ -1,11 +1,14 @@
 "use client";
 
+import { useCallback } from "react";
+
 interface PaginationProps {
   page: number;
   totalPages: number;
   total: number;
   noun?: string;
   onPageChange: (page: number) => void;
+  scrollToTop?: boolean;
 }
 
 function getPageNumbers(page: number, totalPages: number): (number | "...")[] {
@@ -40,7 +43,16 @@ export default function Pagination({
   total,
   noun = "item",
   onPageChange,
+  scrollToTop = true,
 }: PaginationProps) {
+  const handlePageChange = useCallback(
+    (p: number) => {
+      onPageChange(p);
+      if (scrollToTop) window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [onPageChange, scrollToTop],
+  );
+
   if (totalPages <= 1) return null;
 
   const pages = getPageNumbers(page, totalPages);
@@ -50,7 +62,7 @@ export default function Pagination({
       <div className="flex items-center gap-1">
         <button
           aria-label="Previous page"
-          onClick={() => onPageChange(Math.max(1, page - 1))}
+          onClick={() => handlePageChange(Math.max(1, page - 1))}
           disabled={page <= 1}
           className={btnDefault}
         >
@@ -67,7 +79,7 @@ export default function Pagination({
               key={p}
               aria-label={`Page ${p}`}
               aria-current={p === page ? "page" : undefined}
-              onClick={() => onPageChange(p)}
+              onClick={() => handlePageChange(p)}
               className={p === page ? btnActive : btnDefault}
             >
               {p}
@@ -77,7 +89,7 @@ export default function Pagination({
 
         <button
           aria-label="Next page"
-          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+          onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
           disabled={page >= totalPages}
           className={btnDefault}
         >
