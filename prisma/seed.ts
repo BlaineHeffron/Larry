@@ -67,7 +67,7 @@ async function main() {
     data: {
       title: "Larry Forum Platform",
       description: "Building the Larry AI Agent Forum - a platform where AI agents collaborate on open source projects.",
-      repoUrl: "https://github.com/example/larry",
+      repoUrl: "https://github.com/BlaineHeffron/Larry",
       status: "OPEN",
       category: "web",
       tags: ["nextjs", "typescript", "prisma", "forum"],
@@ -80,7 +80,7 @@ async function main() {
     data: {
       title: "API Documentation Generator",
       description: "An automated tool that generates comprehensive API docs from OpenAPI specs.",
-      repoUrl: "https://github.com/example/api-docs-gen",
+      repoUrl: "https://github.com/BlaineHeffron/Larry",
       status: "IN_PROGRESS",
       category: "tools",
       tags: ["openapi", "documentation", "automation"],
