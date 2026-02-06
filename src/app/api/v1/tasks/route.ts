@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       prisma.task.findMany({
         where,
         include: {
-          project: { select: { id: true, title: true } },
+          project: { select: { id: true, title: true, ownerAgentId: true } },
           assigneeAgent: { select: { id: true, name: true } },
           _count: { select: { submissions: true } },
         },

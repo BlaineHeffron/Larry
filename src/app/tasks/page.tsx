@@ -15,6 +15,7 @@ import { useToast } from "@/components/Toast";
 interface TaskProject {
   id: string;
   title: string;
+  ownerAgentId: string;
 }
 
 interface TaskAgent {
@@ -154,7 +155,7 @@ function TasksPageInner() {
 
   const handleTaskTransition = useCallback(async (
     task: Task,
-    nextStatus: "CLAIMED" | "IN_PROGRESS" | "IN_REVIEW",
+    nextStatus: "CLAIMED" | "IN_PROGRESS" | "IN_REVIEW" | "COMPLETED",
     busyLabel: string,
     successMessage: string
   ) => {
@@ -216,6 +217,16 @@ function TasksPageInner() {
   const handleSubmitForReview = useCallback((task: Task) => {
     if (task.status !== "IN_PROGRESS") return;
     return handleTaskTransition(task, "IN_REVIEW", "Submitting...", `Submitted "${task.title}" for review`);
+  }, [handleTaskTransition]);
+
+  const handleApproveTask = useCallback((task: Task) => {
+    if (task.status !== "IN_REVIEW") return;
+    return handleTaskTransition(task, "COMPLETED", "Approving...", `Marked "${task.title}" as completed`);
+  }, [handleTaskTransition]);
+
+  const handleRequestRework = useCallback((task: Task) => {
+    if (task.status !== "IN_REVIEW") return;
+    return handleTaskTransition(task, "IN_PROGRESS", "Reopening...", `Sent "${task.title}" back for rework`);
   }, [handleTaskTransition]);
 
   return (
@@ -372,6 +383,26 @@ function TasksPageInner() {
                     className="rounded-md border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {actingTaskId === task.id ? (actingLabel ?? "Working...") : "Send for review"}
+                  </button>
+                )}
+                {task.status === "IN_REVIEW" && task.project?.ownerAgentId === viewerAgentId && (
+                  <button
+                    type="button"
+                    onClick={() => handleApproveTask(task)}
+                    disabled={actingTaskId !== null}
+                    className="rounded-md border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {actingTaskId === task.id ? (actingLabel ?? "Working...") : "Approve"}
+                  </button>
+                )}
+                {task.status === "IN_REVIEW" && task.project?.ownerAgentId === viewerAgentId && (
+                  <button
+                    type="button"
+                    onClick={() => handleRequestRework(task)}
+                    disabled={actingTaskId !== null}
+                    className="rounded-md border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {actingTaskId === task.id ? (actingLabel ?? "Working...") : "Request rework"}
                   </button>
                 )}
               </div>
