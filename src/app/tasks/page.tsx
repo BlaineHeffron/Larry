@@ -10,6 +10,7 @@ import StatusBadge from "@/components/StatusBadge";
 import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import ScrollToTop from "@/components/ScrollToTop";
+import { useToast } from "@/components/Toast";
 
 interface TaskProject {
   id: string;
@@ -69,6 +70,7 @@ export default function TasksPage() {
 function TasksPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [total, setTotal] = useState(0);
@@ -76,6 +78,8 @@ function TasksPageInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [claimingTaskId, setClaimingTaskId] = useState<string | null>(null);
 
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "All");
   const [priorityFilter, setPriorityFilter] = useState(searchParams.get("priority") || "All");
@@ -134,6 +138,50 @@ function TasksPageInner() {
     setPage(1);
   };
 
+  const handleClaimTask = useCallback(async (task: Task) => {
+    if (claimingTaskId || task.status !== "POSTED") return;
+
+    setClaimError(null);
+    const key = localStorage.getItem("larry_api_key")?.trim() || "";
+    if (!key) {
+      setClaimError("Save your API key in Dashboard settings before claiming tasks.");
+      return;
+    }
+
+    setClaimingTaskId(task.id);
+    try {
+      const res = await fetch(`/api/v1/projects/${task.projectId}/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": key,
+        },
+        body: JSON.stringify({ status: "CLAIMED" }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      const updated = await res.json();
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === task.id
+            ? { ...t, status: updated.status, assigneeAgent: updated.assigneeAgent ?? t.assigneeAgent }
+            : t
+        )
+      );
+      toast(`Claimed "${task.title}"`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setClaimError(message);
+      toast(message, "error");
+    } finally {
+      setClaimingTaskId(null);
+    }
+  }, [claimingTaskId, toast]);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
@@ -190,6 +238,9 @@ function TasksPageInner() {
       {error && (
         <Alert className="mt-6" onRetry={() => setFetchKey(k => k + 1)}>{error}</Alert>
       )}
+      {claimError && (
+        <Alert className="mt-6">{claimError}</Alert>
+      )}
 
       {/* Empty */}
       {!loading && !error && tasks.length === 0 && (
@@ -220,14 +271,17 @@ function TasksPageInner() {
       {!loading && !error && tasks.length > 0 && (
         <div className="mt-6 space-y-3">
           {tasks.map((task) => (
-            <Link
+            <article
               key={task.id}
-              href={`/projects/${task.projectId}/tasks/${task.id}`}
               className="block rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 transition-shadow hover:shadow-md"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-[var(--card-foreground)]">{task.title}</h3>
+                  <h3 className="font-semibold text-[var(--card-foreground)]">
+                    <Link href={`/projects/${task.projectId}/tasks/${task.id}`} className="hover:text-[var(--primary)] transition-colors">
+                      {task.title}
+                    </Link>
+                  </h3>
                   {task.project && (
                     <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">
                       in <span className="font-medium text-[var(--primary)]">{task.project.title}</span>
@@ -248,8 +302,24 @@ function TasksPageInner() {
                   <span>{task._count.submissions} submission{task._count.submissions !== 1 ? "s" : ""}</span>
                 )}
                 <RelativeTime date={task.createdAt} />
+                <Link
+                  href={`/projects/${task.projectId}/tasks/${task.id}`}
+                  className="ml-auto text-[var(--primary)] hover:underline"
+                >
+                  View task
+                </Link>
+                {task.status === "POSTED" && (
+                  <button
+                    type="button"
+                    onClick={() => handleClaimTask(task)}
+                    disabled={claimingTaskId !== null}
+                    className="rounded-md border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {claimingTaskId === task.id ? "Claiming..." : "Claim task"}
+                  </button>
+                )}
               </div>
-            </Link>
+            </article>
           ))}
         </div>
       )}
