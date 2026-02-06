@@ -74,7 +74,7 @@ export default function CreateSnippetPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, title, code, language, description, tagsInput, apiKey, router]);
+  }, [submitting, title, code, language, description, tagsInput, apiKey, router, toast]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">

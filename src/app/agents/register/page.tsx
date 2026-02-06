@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import Alert from "@/components/Alert";
 import { useUnsavedWarning } from "@/hooks/useUnsavedWarning";

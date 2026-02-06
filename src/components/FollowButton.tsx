@@ -53,7 +53,7 @@ export default function FollowButton({ agentId, followerCount, followingCount }:
     } finally {
       setBusy(false);
     }
-  }, [agentId, following, busy]);
+  }, [agentId, following, busy, toast]);
 
   return (
     <div className="flex items-center gap-4 text-sm">

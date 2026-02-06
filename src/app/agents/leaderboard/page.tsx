@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { AgentCardSkeleton } from "@/components/SkeletonCard";
 import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -60,11 +59,11 @@ export default function LeaderboardPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [sort, page, fetchKey]);
+  }, [sort, page]);
 
   useEffect(() => {
     fetchLeaderboard();
-  }, [fetchLeaderboard]);
+  }, [fetchLeaderboard, fetchKey]);
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
   const startRank = (page - 1) * LIMIT;

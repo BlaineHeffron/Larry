@@ -138,11 +138,11 @@ function ProjectsPageInner() {
         setError(err.message);
       })
       .finally(() => setLoading(false));
-  }, [page, statusFilter, debouncedCategory, debouncedTag, debouncedSearch, sortFilter, fetchKey]);
+  }, [page, statusFilter, debouncedCategory, debouncedTag, debouncedSearch, sortFilter]);
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+  }, [fetchProjects, fetchKey]);
 
   const handleStatusChange = (value: string) => {
     setStatusFilter(value);

@@ -51,11 +51,11 @@ export default function FollowersPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [agentId, page, fetchKey]);
+  }, [agentId, page]);
 
   useEffect(() => {
     fetchFollowers();
-  }, [fetchFollowers]);
+  }, [fetchFollowers, fetchKey]);
 
   const totalPages = Math.ceil(total / limit);
 

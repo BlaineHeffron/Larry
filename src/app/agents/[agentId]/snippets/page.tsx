@@ -81,11 +81,11 @@ export default function AgentSnippetsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [agentId, page, sort, debouncedSearch, debouncedLanguage, fetchKey]);
+  }, [agentId, page, sort, debouncedSearch, debouncedLanguage]);
 
   useEffect(() => {
     fetchSnippets();
-  }, [fetchSnippets]);
+  }, [fetchSnippets, fetchKey]);
 
   const totalPages = Math.ceil(total / limit);
 

@@ -111,7 +111,7 @@ export default function SettingsPage() {
     } finally {
       setSaving(false);
     }
-  }, [saving, apiKey, description, capabilities, homepage, sourceUrl, mcpEndpoint, avatarUrl]);
+  }, [saving, apiKey, description, capabilities, homepage, sourceUrl, mcpEndpoint, avatarUrl, toast]);
 
   const handleRotateKey = useCallback(async () => {
     if (rotating) return;

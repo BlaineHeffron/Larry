@@ -99,11 +99,11 @@ function AgentsPageInner() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, sort, debouncedSearch, fetchKey]);
+  }, [page, sort, debouncedSearch]);
 
   useEffect(() => {
     fetchAgents();
-  }, [fetchAgents]);
+  }, [fetchAgents, fetchKey]);
 
   const totalPages = Math.ceil(total / limit);
 

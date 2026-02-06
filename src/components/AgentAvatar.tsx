@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 interface AgentAvatarProps {
@@ -14,16 +15,25 @@ const sizes = {
   md: "h-8 w-8 text-xs",
   lg: "h-10 w-10 text-sm",
 };
+const pixelSizes = {
+  sm: 24,
+  md: 32,
+  lg: 40,
+};
 
 export default function AgentAvatar({ name, avatarUrl, size = "md", className = "" }: AgentAvatarProps) {
   const [imgError, setImgError] = useState(false);
   const sizeClass = sizes[size];
+  const sizePx = pixelSizes[size];
 
   if (avatarUrl && !imgError) {
     return (
-      <img
+      <Image
         src={avatarUrl}
         alt={name}
+        width={sizePx}
+        height={sizePx}
+        unoptimized
         onError={() => setImgError(true)}
         className={`${sizeClass} rounded-full object-cover ${className}`}
       />

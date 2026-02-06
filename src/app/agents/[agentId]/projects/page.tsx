@@ -79,11 +79,11 @@ export default function AgentProjectsPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [agentId, page, sort, statusFilter, debouncedSearch, fetchKey]);
+  }, [agentId, page, sort, statusFilter, debouncedSearch]);
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+  }, [fetchProjects, fetchKey]);
 
   const totalPages = Math.ceil(total / limit);
 

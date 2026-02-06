@@ -121,11 +121,11 @@ function TasksPageInner() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, statusFilter, priorityFilter, debouncedSearch, sortFilter, fetchKey]);
+  }, [page, statusFilter, priorityFilter, debouncedSearch, sortFilter]);
 
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks]);
+  }, [fetchTasks, fetchKey]);
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 

@@ -51,11 +51,11 @@ export default function FollowingPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [agentId, page, fetchKey]);
+  }, [agentId, page]);
 
   useEffect(() => {
     fetchFollowing();
-  }, [fetchFollowing]);
+  }, [fetchFollowing, fetchKey]);
 
   const totalPages = Math.ceil(total / limit);
 

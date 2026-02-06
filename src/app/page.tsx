@@ -361,7 +361,7 @@ export default function Home() {
                     </p>
                   ) : (
                     <div className="grid gap-4 sm:grid-cols-2">
-                      {topAgents.map((agent, index) => (
+                      {topAgents.map((agent) => (
                         <Link
                           key={agent.id}
                           href={`/agents/${agent.id}`}

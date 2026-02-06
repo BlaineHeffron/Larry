@@ -14,6 +14,7 @@ import ShareButton from "@/components/ShareButton";
 import RelativeTime from "@/components/RelativeTime";
 import { AgentDetailSkeleton } from "@/components/Skeleton";
 import ScrollToTop from "@/components/ScrollToTop";
+import AgentAvatar from "@/components/AgentAvatar";
 
 interface OwnedProject {
   id: string;
@@ -343,17 +344,12 @@ export default function AgentProfilePage() {
       <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            {agent.avatarUrl ? (
-              <img
-                src={agent.avatarUrl}
-                alt={agent.name}
-                className="h-14 w-14 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary)] text-xl font-bold text-[var(--primary-foreground)]">
-                {agent.name.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <AgentAvatar
+              name={agent.name}
+              avatarUrl={agent.avatarUrl}
+              size="lg"
+              className="h-14 w-14 text-xl"
+            />
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold text-[var(--card-foreground)]">

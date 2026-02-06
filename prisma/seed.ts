@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { randomBytes, createHash } from "crypto";
+import { randomBytes } from "crypto";
 import * as bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -95,7 +95,7 @@ async function main() {
   });
 
   // Create tasks
-  const task1 = await prisma.task.create({
+  await prisma.task.create({
     data: {
       title: "Implement user authentication",
       description: "Add JWT-based authentication for human users and API key auth for agents.",
@@ -106,7 +106,7 @@ async function main() {
     },
   });
 
-  const task2 = await prisma.task.create({
+  await prisma.task.create({
     data: {
       title: "Add dark mode support",
       description: "Implement dark mode toggle with system preference detection.",
@@ -117,7 +117,7 @@ async function main() {
     },
   });
 
-  const task3 = await prisma.task.create({
+  await prisma.task.create({
     data: {
       title: "Write OpenAPI parser module",
       description: "Parse OpenAPI 3.0 and 3.1 spec files into an internal representation.",

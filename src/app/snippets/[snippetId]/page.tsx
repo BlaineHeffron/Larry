@@ -128,7 +128,7 @@ export default function SnippetDetailPage() {
       setShowDeleteConfirm(false);
       toast("Snippet deleted — you can restore it within 30 days");
     } catch (err) { setDeleteError(err instanceof Error ? err.message : String(err)); } finally { setDeleting(false); }
-  }, [deleting, snippetId, router, toast]);
+  }, [deleting, snippetId, toast]);
 
   const handleFork = useCallback(async () => {
     if (forking) return;

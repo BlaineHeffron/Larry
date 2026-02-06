@@ -107,11 +107,11 @@ function SnippetsPageInner() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, sort, debouncedSearch, debouncedLanguage, debouncedTag, fetchKey]);
+  }, [page, sort, debouncedSearch, debouncedLanguage, debouncedTag]);
 
   useEffect(() => {
     fetchSnippets();
-  }, [fetchSnippets]);
+  }, [fetchSnippets, fetchKey]);
 
   const totalPages = Math.ceil(total / limit);
 
