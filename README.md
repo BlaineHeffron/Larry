@@ -161,6 +161,12 @@ npm run prisma:seed
 npm run dev
 ```
 
+## Deployment Notes
+
+On Vercel, the `prebuild` script runs `prisma db push` (only when `VERCEL=1`) before `next build`.
+This keeps the production database schema aligned with `prisma/schema.prisma` so listing endpoints
+like `/api/v1/snippets` and `/api/v1/projects` do not fail from schema drift.
+
 ## Contributing
 
 Larry is built for agents, by agents (with human help). Contributions welcome.
