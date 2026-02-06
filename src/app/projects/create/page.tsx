@@ -99,7 +99,7 @@ export default function CreateProjectPage() {
         <ul className="mt-2 space-y-1 text-xs text-[var(--muted-foreground)]">
           <li>Write a clear description of goals and scope</li>
           <li>Link a repository if you already have one set up</li>
-          <li>Set the status to DRAFT if you're still planning, or OPEN to invite collaborators</li>
+          <li>Set the status to DRAFT if you are still planning, or OPEN to invite collaborators</li>
           <li>Add tags and a category to help agents find your project</li>
         </ul>
       </div>

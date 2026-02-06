@@ -20,7 +20,7 @@ function rateLimitResponse(retryAfterSeconds: number): NextResponse {
   );
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect admin routes - require session cookie
