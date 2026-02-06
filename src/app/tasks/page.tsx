@@ -78,8 +78,10 @@ function TasksPageInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
-  const [claimError, setClaimError] = useState<string | null>(null);
-  const [claimingTaskId, setClaimingTaskId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actingTaskId, setActingTaskId] = useState<string | null>(null);
+  const [actingLabel, setActingLabel] = useState<string | null>(null);
+  const [viewerAgentId, setViewerAgentId] = useState<string | null>(null);
 
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "All");
   const [priorityFilter, setPriorityFilter] = useState(searchParams.get("priority") || "All");
@@ -131,6 +133,18 @@ function TasksPageInner() {
     fetchTasks();
   }, [fetchTasks, fetchKey]);
 
+  useEffect(() => {
+    const key = localStorage.getItem("larry_api_key")?.trim() || "";
+    if (!key) {
+      setViewerAgentId(null);
+      return;
+    }
+    fetch("/api/v1/me", { headers: { "x-api-key": key } })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setViewerAgentId(data?.id ?? null))
+      .catch(() => setViewerAgentId(null));
+  }, [fetchKey]);
+
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   const resetPage = (setter: (v: string) => void, value: string) => {
@@ -138,17 +152,23 @@ function TasksPageInner() {
     setPage(1);
   };
 
-  const handleClaimTask = useCallback(async (task: Task) => {
-    if (claimingTaskId || task.status !== "POSTED") return;
+  const handleTaskTransition = useCallback(async (
+    task: Task,
+    nextStatus: "CLAIMED" | "IN_PROGRESS" | "IN_REVIEW",
+    busyLabel: string,
+    successMessage: string
+  ) => {
+    if (actingTaskId) return;
 
-    setClaimError(null);
+    setActionError(null);
     const key = localStorage.getItem("larry_api_key")?.trim() || "";
     if (!key) {
-      setClaimError("Save your API key in Dashboard settings before claiming tasks.");
+      setActionError("Save your API key in Dashboard settings before using quick actions.");
       return;
     }
 
-    setClaimingTaskId(task.id);
+    setActingTaskId(task.id);
+    setActingLabel(busyLabel);
     try {
       const res = await fetch(`/api/v1/projects/${task.projectId}/tasks/${task.id}`, {
         method: "PATCH",
@@ -156,7 +176,7 @@ function TasksPageInner() {
           "Content-Type": "application/json",
           "x-api-key": key,
         },
-        body: JSON.stringify({ status: "CLAIMED" }),
+        body: JSON.stringify({ status: nextStatus }),
       });
 
       if (!res.ok) {
@@ -172,15 +192,31 @@ function TasksPageInner() {
             : t
         )
       );
-      toast(`Claimed "${task.title}"`);
+      toast(successMessage);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      setClaimError(message);
+      setActionError(message);
       toast(message, "error");
     } finally {
-      setClaimingTaskId(null);
+      setActingTaskId(null);
+      setActingLabel(null);
     }
-  }, [claimingTaskId, toast]);
+  }, [actingTaskId, toast]);
+
+  const handleClaimTask = useCallback((task: Task) => {
+    if (task.status !== "POSTED") return;
+    return handleTaskTransition(task, "CLAIMED", "Claiming...", `Claimed "${task.title}"`);
+  }, [handleTaskTransition]);
+
+  const handleStartWork = useCallback((task: Task) => {
+    if (task.status !== "CLAIMED") return;
+    return handleTaskTransition(task, "IN_PROGRESS", "Starting...", `Moved "${task.title}" to in-progress`);
+  }, [handleTaskTransition]);
+
+  const handleSubmitForReview = useCallback((task: Task) => {
+    if (task.status !== "IN_PROGRESS") return;
+    return handleTaskTransition(task, "IN_REVIEW", "Submitting...", `Submitted "${task.title}" for review`);
+  }, [handleTaskTransition]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -238,8 +274,8 @@ function TasksPageInner() {
       {error && (
         <Alert className="mt-6" onRetry={() => setFetchKey(k => k + 1)}>{error}</Alert>
       )}
-      {claimError && (
-        <Alert className="mt-6">{claimError}</Alert>
+      {actionError && (
+        <Alert className="mt-6">{actionError}</Alert>
       )}
 
       {/* Empty */}
@@ -312,10 +348,30 @@ function TasksPageInner() {
                   <button
                     type="button"
                     onClick={() => handleClaimTask(task)}
-                    disabled={claimingTaskId !== null}
+                    disabled={actingTaskId !== null}
                     className="rounded-md border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {claimingTaskId === task.id ? "Claiming..." : "Claim task"}
+                    {actingTaskId === task.id ? (actingLabel ?? "Working...") : "Claim task"}
+                  </button>
+                )}
+                {task.status === "CLAIMED" && task.assigneeAgent?.id === viewerAgentId && (
+                  <button
+                    type="button"
+                    onClick={() => handleStartWork(task)}
+                    disabled={actingTaskId !== null}
+                    className="rounded-md border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {actingTaskId === task.id ? (actingLabel ?? "Working...") : "Start work"}
+                  </button>
+                )}
+                {task.status === "IN_PROGRESS" && task.assigneeAgent?.id === viewerAgentId && (
+                  <button
+                    type="button"
+                    onClick={() => handleSubmitForReview(task)}
+                    disabled={actingTaskId !== null}
+                    className="rounded-md border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {actingTaskId === task.id ? (actingLabel ?? "Working...") : "Send for review"}
                   </button>
                 )}
               </div>
