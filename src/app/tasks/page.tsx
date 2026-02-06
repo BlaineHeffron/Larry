@@ -43,8 +43,14 @@ const SORT_OPTIONS = [
   { value: "oldest", label: "Oldest" },
   { value: "priority", label: "Priority" },
 ];
+const SORT_VALUES = SORT_OPTIONS.map((option) => option.value);
 
 const LIMIT = 12;
+
+function normalizeFilterOption(value: string | null, options: readonly string[], fallback: string): string {
+  if (!value) return fallback;
+  return options.includes(value) ? value : fallback;
+}
 
 export default function TasksPage() {
   return (
@@ -82,12 +88,19 @@ function TasksPageInner() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actingTaskId, setActingTaskId] = useState<string | null>(null);
   const [actingLabel, setActingLabel] = useState<string | null>(null);
-  const [viewerAgentId, setViewerAgentId] = useState<string | null>(null);
+  const [viewerAgentId, setViewerAgentId] = useState<string | null | undefined>(undefined);
 
-  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "All");
-  const [priorityFilter, setPriorityFilter] = useState(searchParams.get("priority") || "All");
+  const [statusFilter, setStatusFilter] = useState(() =>
+    normalizeFilterOption(searchParams.get("status"), STATUS_OPTIONS, "All")
+  );
+  const [priorityFilter, setPriorityFilter] = useState(() =>
+    normalizeFilterOption(searchParams.get("priority"), PRIORITY_OPTIONS, "All")
+  );
   const [searchFilter, setSearchFilter] = useState(searchParams.get("search") || "");
-  const [sortFilter, setSortFilter] = useState(searchParams.get("sort") || "recent");
+  const [sortFilter, setSortFilter] = useState(() =>
+    normalizeFilterOption(searchParams.get("sort"), SORT_VALUES, "recent")
+  );
+  const [mineOnly, setMineOnly] = useState(searchParams.get("mine") === "1");
 
   const debouncedSearch = useDebounce(searchFilter, 300);
 
@@ -100,10 +113,11 @@ function TasksPageInner() {
     if (priorityFilter !== "All") params.set("priority", priorityFilter);
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (sortFilter !== "recent") params.set("sort", sortFilter);
+    if (mineOnly) params.set("mine", "1");
     if (page > 1) params.set("page", String(page));
     const qs = params.toString();
     router.replace(qs ? `?${qs}` : "/tasks", { scroll: false });
-  }, [statusFilter, priorityFilter, debouncedSearch, sortFilter, page, router]);
+  }, [statusFilter, priorityFilter, debouncedSearch, sortFilter, mineOnly, page, router]);
 
   const fetchTasks = useCallback(() => {
     setLoading(true);
@@ -116,6 +130,7 @@ function TasksPageInner() {
     if (statusFilter !== "All") params.set("status", statusFilter);
     if (priorityFilter !== "All") params.set("priority", priorityFilter);
     if (debouncedSearch.trim()) params.set("search", debouncedSearch.trim());
+    if (mineOnly && viewerAgentId) params.set("assigneeId", viewerAgentId);
 
     fetch(`/api/v1/tasks?${params.toString()}`)
       .then((res) => {
@@ -128,7 +143,7 @@ function TasksPageInner() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [page, statusFilter, priorityFilter, debouncedSearch, sortFilter]);
+  }, [page, statusFilter, priorityFilter, debouncedSearch, sortFilter, mineOnly, viewerAgentId]);
 
   useEffect(() => {
     fetchTasks();
@@ -146,12 +161,27 @@ function TasksPageInner() {
       .catch(() => setViewerAgentId(null));
   }, [fetchKey]);
 
+  useEffect(() => {
+    if (mineOnly && viewerAgentId === null) {
+      setMineOnly(false);
+    }
+  }, [mineOnly, viewerAgentId]);
+
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   const resetPage = (setter: (v: string) => void, value: string) => {
     setter(value);
     setPage(1);
   };
+
+  const toggleMineOnly = useCallback(() => {
+    if (!mineOnly && viewerAgentId === null) {
+      toast("Save your API key in Dashboard settings to filter tasks assigned to you.", "error");
+      return;
+    }
+    setMineOnly((prev) => !prev);
+    setPage(1);
+  }, [mineOnly, viewerAgentId, toast]);
 
   const handleTaskTransition = useCallback(async (
     task: Task,
@@ -270,6 +300,17 @@ function TasksPageInner() {
             ))}
           </select>
         </div>
+        <button
+          type="button"
+          onClick={toggleMineOnly}
+          className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+            mineOnly
+              ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]"
+              : "border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--muted)]"
+          }`}
+        >
+          Assigned to me
+        </button>
       </div>
 
       {/* Loading Skeletons */}

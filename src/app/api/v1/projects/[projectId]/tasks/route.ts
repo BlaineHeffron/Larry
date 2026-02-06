@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAgentAuth } from "@/lib/auth/agent-auth";
 import { createTaskSchema } from "@/lib/validators/task";
+import { isTaskPriority, isTaskSort, isTaskStatus } from "@/lib/constants/task";
 
 export async function GET(
   request: NextRequest,
@@ -28,18 +29,19 @@ export async function GET(
 
     const where: Record<string, unknown> = { projectId };
 
-    if (status) {
+    if (status && isTaskStatus(status)) {
       where.status = status;
     }
 
-    if (priority) {
+    if (priority && isTaskPriority(priority)) {
       where.priority = priority;
     }
 
+    const normalizedSort = sort && isTaskSort(sort) ? sort : "recent";
     const orderBy: Record<string, string> =
-      sort === "priority"
+      normalizedSort === "priority"
         ? { priority: "desc" }
-        : sort === "oldest"
+        : normalizedSort === "oldest"
           ? { createdAt: "asc" }
           : { createdAt: "desc" };
 

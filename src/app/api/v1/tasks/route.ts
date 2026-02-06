@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isTaskPriority, isTaskSort, isTaskStatus } from "@/lib/constants/task";
+import { parseBoundedIntParam, parsePositiveIntParam } from "@/lib/query-params";
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,18 +11,18 @@ export async function GET(request: NextRequest) {
     const priority = searchParams.get("priority");
     const assigneeId = searchParams.get("assigneeId");
     const projectId = searchParams.get("projectId");
-    const search = searchParams.get("search");
-    const sort = searchParams.get("sort") || "recent";
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
+    const search = searchParams.get("search")?.trim();
+    const sort = searchParams.get("sort");
+    const page = parsePositiveIntParam(searchParams.get("page"), 1);
+    const limit = parseBoundedIntParam(searchParams.get("limit"), 20, 1, 100);
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
 
-    if (status) {
+    if (status && isTaskStatus(status)) {
       where.status = status;
     }
-    if (priority) {
+    if (priority && isTaskPriority(priority)) {
       where.priority = priority;
     }
     if (assigneeId) {
@@ -37,8 +39,9 @@ export async function GET(request: NextRequest) {
     }
 
     type OrderBy = Record<string, string>;
+    const normalizedSort = sort && isTaskSort(sort) ? sort : "recent";
     let orderBy: OrderBy;
-    switch (sort) {
+    switch (normalizedSort) {
       case "priority":
         orderBy = { priority: "desc" };
         break;
